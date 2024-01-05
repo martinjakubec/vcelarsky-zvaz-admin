@@ -1,8 +1,37 @@
 datasource db {
   provider = "sqlite"
-  url      = "file:dev.db"
+  url      = "file:../dev.db"
 }
 
 generator client {
   provider = "prisma-client-js"
+}
+
+model Member {
+  id              Int       @id
+  name            String
+  surname         String
+  address         String
+  phone           String?
+  email           String?
+  district        District? @relation(fields: [districtId], references: [id], name: "SimpleMembers")
+  managerDistrict District? @relation(name: "DistrictManager")
+  districtId      Int?
+  deletedAt       DateTime?
+}
+
+model District {
+  id                Int       @id
+  name              String
+  members           Member[]  @relation(name: "SimpleMembers")
+  districtManagerId Int?      @unique
+  districtManager   Member?   @relation(fields: [districtManagerId], references: [id], name: "DistrictManager")
+  deletedAt         DateTime?
+}
+
+model User {
+  id        String    @id @default(uuid())
+  username  String    @unique
+  password  String
+  deletedAt DateTime?
 }
