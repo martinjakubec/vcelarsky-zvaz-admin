@@ -8,7 +8,7 @@ generator client {
 }
 
 model Member {
-  id              Int       @id
+  id              String    @id
   name            String
   surname         String
   address         String
@@ -16,15 +16,15 @@ model Member {
   email           String?
   district        District? @relation(fields: [districtId], references: [id], name: "SimpleMembers")
   managerDistrict District? @relation(name: "DistrictManager")
-  districtId      Int?
+  districtId      String?
   deletedAt       DateTime?
 }
 
 model District {
-  id                Int       @id
+  id                String    @id
   name              String
   members           Member[]  @relation(name: "SimpleMembers")
-  districtManagerId Int?      @unique
+  districtManagerId String?   @unique
   districtManager   Member?   @relation(fields: [districtManagerId], references: [id], name: "DistrictManager")
   deletedAt         DateTime?
 }

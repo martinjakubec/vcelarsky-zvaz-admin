@@ -5,43 +5,51 @@ import {compare, hash} from 'bcrypt';
 const userRouter = express.Router();
 
 userRouter.get('/', async (req, res) => {
-  const users = await prismaClient.user.findMany({
-    select: {
-      id: true,
-      username: true,
-    },
-  });
-  res.json(users);
+  try {
+    const users = await prismaClient.user.findMany({
+      select: {
+        id: true,
+        username: true,
+      },
+    });
+    return res.json(users);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send('Something went wrong');
+  }
 });
 
 userRouter.get('/:username', async (req, res) => {
   const {username} = req.params;
-  const user = await prismaClient.user.findUnique({
-    where: {
-      username,
-    },
-    select: {
-      id: true,
-      username: true,
-    },
-  });
-  res.json(user);
+  try {
+    const user = await prismaClient.user.findUnique({
+      where: {
+        username,
+      },
+      select: {
+        id: true,
+        username: true,
+      },
+    });
+    return res.json(user);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send('Something went wrong');
+  }
 });
 
 userRouter.post('/', async (req, res) => {
   const {username, password} = req.body;
-  if (!username) {
-    res.status(400).send('Username is required');
-    return;
+  if (!username) return res.status(400).send('Username is required');
+  if (!password) return res.status(400).send('Password is required');
+  try {
+    if (await prismaClient.user.findUnique({where: {username}}))
+      return res.status(400).send('Username already exists');
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send('Something went wrong');
   }
-  if (!password) {
-    res.status(400).send('Password is required');
-    return;
-  }
-  if (await prismaClient.user.findUnique({where: {username}})) {
-    res.status(400).send('Username already exists');
-    return;
-  }
+
   try {
     const user = await prismaClient.user.create({
       data: {
@@ -53,51 +61,59 @@ userRouter.post('/', async (req, res) => {
         username: true,
       },
     });
-    res.json(user);
+    return res.json(user);
   } catch (error) {
-    res.status(500).send('Something went wrong');
+    return res.status(500).send('Something went wrong');
   }
 });
 
 userRouter.put('/:username', async (req, res) => {
   const {username} = req.params;
   const {oldPassword, newPassword} = req.body;
-  if (!oldPassword) {
-    res.status(400).send('Old password is required');
-    return;
-  }
-  if (!newPassword) {
-    res.status(400).send('New password is required');
-    return;
-  }
-  const userToUpdate = await prismaClient.user.findUnique({
-    where: {
-      username,
-    },
-  });
-  if (!userToUpdate) {
-    res.status(404).send('User not found');
-    return;
-  }
-  const oldPasswordMatches = await compare(oldPassword, userToUpdate.password);
-  if (!oldPasswordMatches) {
-    res.status(400).send('Old password does not match');
-    return;
+  if (!res.locals.isUserLoggedIn) return res.status(401).send('Unauthorized');
+  if (res.locals.username !== username)
+    return res.status(401).send('Unauthorized');
+  if (!oldPassword) return res.status(400).send('Old password is required');
+  if (!newPassword) return res.status(400).send('New password is required');
+  try {
+    const userToUpdate = await prismaClient.user.findUnique({
+      where: {
+        username,
+      },
+    });
+    if (!userToUpdate) {
+      return res.status(404).send('User not found');
+    }
+    const oldPasswordMatches = await compare(
+      oldPassword,
+      userToUpdate.password
+    );
+    if (!oldPasswordMatches) {
+      return res.status(400).send('Old password does not match');
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send('Something went wrong');
   }
 
-  const user = await prismaClient.user.update({
-    where: {
-      username,
-    },
-    data: {
-      password: await hash(newPassword, 10),
-    },
-    select: {
-      id: true,
-      username: true,
-    },
-  });
-  res.json(user);
+  try {
+    const user = await prismaClient.user.update({
+      where: {
+        username,
+      },
+      data: {
+        password: await hash(newPassword, 10),
+      },
+      select: {
+        id: true,
+        username: true,
+      },
+    });
+    return res.json(user);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send('Something went wrong');
+  }
 });
 
 userRouter.delete('/', async (req, res) => {

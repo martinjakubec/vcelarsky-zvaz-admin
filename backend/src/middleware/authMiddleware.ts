@@ -2,6 +2,12 @@ import {NextFunction, Request, Response} from 'express';
 import {TokenExpiredError, verify} from 'jsonwebtoken';
 import {JWT_SECRET} from '../contants';
 
+declare namespace express {
+  interface Request {
+    isUserLoggedIn: boolean;
+  }
+}
+
 const authMiddleware = async (
   req: Request,
   res: Response,
@@ -13,12 +19,14 @@ const authMiddleware = async (
   try {
     const decoded = verify(token, JWT_SECRET);
     if (typeof decoded !== 'string') {
-      res.locals.username = decoded.username;
+      res.locals.username = decoded.username as string;
     }
     res.locals.isUserLoggedIn = true;
     return next();
   } catch (error) {
     if (error instanceof TokenExpiredError) {
+      console.log('Token expired');
+
       return next();
     } else {
       console.log(error);
