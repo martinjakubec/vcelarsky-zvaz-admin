@@ -8,12 +8,18 @@ import {debug} from './utils/debug';
 const app = express();
 
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
-app.use(express.static(path.join(__dirname, '..', '..', 'frontend', 'dist')));
 app.use(authMiddleware);
-process.env.DEBUG === '1' && app.use(debug);
 
 app.use('/api', apiRouter);
+app.use(
+  '/',
+  express.static(path.join(__dirname, '..', '..', 'frontend', 'dist'))
+);
+app.use(
+  '*',
+  express.static(path.join(__dirname, '..', '..', 'frontend', 'dist'))
+);
+process.env.DEBUG === '1' && app.use(debug);
 
 app.listen(3000, () => {
   console.log('listening on port 3000');
