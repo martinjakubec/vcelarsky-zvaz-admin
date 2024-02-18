@@ -6,7 +6,16 @@ const districtRouter = express.Router();
 districtRouter.get('/', async (req, res) => {
   if (!res.locals.isUserLoggedIn) return res.status(401).send('Unauthorized');
   try {
-    const districts = await prismaClient.district.findMany();
+    const districts = await prismaClient.district.findMany({
+      where: {
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        districtManagerId: true,
+      },
+    });
     return res.json(districts);
   } catch (error) {
     console.log(error);

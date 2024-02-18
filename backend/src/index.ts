@@ -5,10 +5,13 @@ import path from 'path';
 import apiRouter from './router/apiRouter';
 import authMiddleware from './middleware/authMiddleware';
 import {debug} from './utils/debug';
+import cors from 'cors';
 const app = express();
 
 app.use(express.json());
+app.use(cors({origin: '*'}));
 app.use(authMiddleware);
+process.env.DEBUG === '1' && app.use(debug);
 
 app.use('/api', apiRouter);
 app.use(
@@ -19,7 +22,6 @@ app.use(
   '*',
   express.static(path.join(__dirname, '..', '..', 'frontend', 'dist'))
 );
-process.env.DEBUG === '1' && app.use(debug);
 
 app.listen(3000, () => {
   console.log('listening on port 3000');

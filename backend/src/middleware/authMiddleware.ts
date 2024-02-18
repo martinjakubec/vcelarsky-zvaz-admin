@@ -1,12 +1,6 @@
 import {NextFunction, Request, Response} from 'express';
-import {TokenExpiredError, verify} from 'jsonwebtoken';
+import {JsonWebTokenError, TokenExpiredError, verify} from 'jsonwebtoken';
 import {JWT_SECRET} from '../contants';
-
-declare namespace express {
-  interface Request {
-    isUserLoggedIn: boolean;
-  }
-}
 
 const authMiddleware = async (
   req: Request,
@@ -26,12 +20,14 @@ const authMiddleware = async (
   } catch (error) {
     if (error instanceof TokenExpiredError) {
       console.log('Token expired');
-
+      return next();
+    } else if (error instanceof JsonWebTokenError) {
+      console.log('Invalid token');
       return next();
     } else {
       console.log(error);
+      return next();
     }
-    return next();
   }
 };
 

@@ -39,9 +39,13 @@ userRouter.get('/:username', async (req, res) => {
 });
 
 userRouter.post('/', async (req, res) => {
-  const {username, password} = req.body;
+  const {username, password, passwordConfirmation} = req.body;
   if (!username) return res.status(400).send('Username is required');
   if (!password) return res.status(400).send('Password is required');
+  if (!passwordConfirmation)
+    return res.status(400).send('Password confirmation is required');
+  if (password !== passwordConfirmation)
+    return res.status(400).send('Passwords do not match');
   try {
     if (await prismaClient.user.findUnique({where: {username}}))
       return res.status(400).send('Username already exists');
