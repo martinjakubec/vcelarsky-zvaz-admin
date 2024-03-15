@@ -1,58 +1,73 @@
-import express from 'express';
-import prismaClient from '../prismaClient';
+import express from "express";
+import prismaClient from "../prismaClient";
+import { log } from "console";
 
 const districtRouter = express.Router();
 
-districtRouter.get('/', async (req, res) => {
-  if (!res.locals.isUserLoggedIn) return res.status(401).send('Unauthorized');
+districtRouter.get("/", async (req, res) => {
+  if (!res.locals.isUserLoggedIn) return res.status(401).send("Unauthorized");
   try {
     const districts = await prismaClient.district.findMany({
       where: {
         deletedAt: null,
       },
-      select: {
-        id: true,
-        name: true,
-        districtManagerId: true,
+      include: {
+        districtManager: {
+          select: {
+            name: true,
+            surname: true,
+            id: true,
+          },
+        },
       },
     });
     return res.json(districts);
   } catch (error) {
     console.log(error);
-    return res.status(500).send('Something went wrong');
+    return res.status(500).send("Something went wrong");
   }
 });
 
-districtRouter.get('/:districtId', async (req, res) => {
-  if (!res.locals.isUserLoggedIn) return res.status(401).send('Unauthorized');
+districtRouter.get("/:districtId", async (req, res) => {
+  if (!res.locals.isUserLoggedIn) return res.status(401).send("Unauthorized");
   try {
     const district = await prismaClient.district.findUnique({
       where: {
         id: req.params.districtId,
+        deletedAt: null,
       },
+      include: {
+        districtManager: true,
+        members: {
+          where: {
+            deletedAt: null,
+          }
+        }
+      }
     });
-    if (!district) return res.status(404).send('District not found');
+    if (!district) return res.status(404).send("District not found");
     return res.json(district);
   } catch (error) {
     console.log(error);
-    return res.status(500).send('Something went wrong');
+    return res.status(500).send("Something went wrong");
   }
 });
 
-districtRouter.post('/', async (req, res) => {
-  if (!res.locals.isUserLoggedIn) return res.status(401).send('Unauthorized');
-  if (!req.body) return res.status(400).send('Bad request');
+districtRouter.post("/", async (req, res) => {
+  if (!res.locals.isUserLoggedIn) return res.status(401).send("Unauthorized");
+  if (!req.body) return res.status(400).send("No body provided");
 
-  const {id, name} = req.body;
-  if (!id) return res.status(400).send('Id is required');
-  if (!name) return res.status(400).send('Name is required');
+  const { id, name, districtManagerId } = req.body;
+  if (!id) return res.status(400).send("Id is required");
+  if (!name) return res.status(400).send("Name is required");
 
   try {
-    if (await prismaClient.district.findUnique({where: {id}}))
-      return res.status(400).send('District with this ID already exists');
+    if (await prismaClient.district.findUnique({ where: { id } })) {
+      return res.status(400).send("District with this ID already exists");
+    }
   } catch (error) {
     console.log(error);
-    return res.status(500).send('Something went wrong');
+    return res.status(500).send("Something went wrong");
   }
 
   try {
@@ -60,41 +75,48 @@ districtRouter.post('/', async (req, res) => {
       data: {
         id,
         name,
+        districtManagerId: districtManagerId
+          ? districtManagerId.toString()
+          : undefined,
       },
     });
     return res.json(district);
   } catch (error) {
     console.log(error);
-    return res.status(500).send('Something went wrong');
+    return res.status(500).send("Something went wrong");
   }
 });
 
-districtRouter.put('/:districtId', async (req, res) => {
-  if (!res.locals.isUserLoggedIn) return res.status(401).send('Unauthorized');
-  const {districtId} = req.params;
-  if (!req.body) return res.status(400).send('Bad request');
+districtRouter.put("/:districtId", async (req, res) => {
+  if (!res.locals.isUserLoggedIn) return res.status(401).send("Unauthorized");
+  const { districtId } = req.params;
+  if (!req.body) return res.status(400).send("Bad request");
 
-  const {name, managerId, newId} = req.body;
-  if (name === null) return res.status(400).send('Name is required');
+  const { name, managerId, newId } = req.body;
+  if (name === null) return res.status(400).send("Name is required");
 
   try {
-    if (!(await prismaClient.district.findUnique({where: {id: districtId}})))
-      return res.status(404).send('District not found');
+    if (
+      !(await prismaClient.district.findUnique({ where: { id: districtId } }))
+    )
+      return res.status(404).send("District not found");
 
     if (
       newId.toString() &&
       newId.toString() !== districtId &&
-      (await prismaClient.district.findUnique({where: {id: newId.toString()}}))
+      (await prismaClient.district.findUnique({
+        where: { id: newId.toString() },
+      }))
     )
-      return res.status(400).send('District with this ID already exists');
+      return res.status(400).send("District with this ID already exists");
 
     if (
       managerId &&
       !(await prismaClient.member.findUnique({
-        where: {id: managerId.toString()},
+        where: { id: managerId.toString() },
       }))
     )
-      return res.status(404).send('Manager not found');
+      return res.status(404).send("Manager not found");
 
     const district = await prismaClient.district.update({
       where: {
@@ -104,7 +126,7 @@ districtRouter.put('/:districtId', async (req, res) => {
         id: newId.toString(),
         name,
         districtManager: {
-          connect: managerId ? {id: managerId.toString()} : undefined,
+          connect: managerId ? { id: managerId.toString() } : undefined,
           disconnect: managerId === null ? true : undefined,
         },
       },
@@ -113,19 +135,19 @@ districtRouter.put('/:districtId', async (req, res) => {
     return res.json(district);
   } catch (error) {
     console.log(error);
-    return res.status(500).send('Something went wrong');
+    return res.status(500).send("Something went wrong");
   }
 });
 
-districtRouter.delete('/', async (req, res) => {
-  if (!res.locals.isUserLoggedIn) return res.status(401).send('Unauthorized');
+districtRouter.delete("/", async (req, res) => {
+  if (!res.locals.isUserLoggedIn) return res.status(401).send("Unauthorized");
 
-  const {id} = req.body;
-  if (!id) return res.status(400).send('Id is required');
+  const { id } = req.body;
+  if (!id) return res.status(400).send("Id is required");
 
   try {
-    if (!(await prismaClient.district.findUnique({where: {id: id}})))
-      return res.status(404).send('District not found');
+    if (!(await prismaClient.district.findUnique({ where: { id: id } })))
+      return res.status(404).send("District not found");
 
     const deletedDistrict = await prismaClient.district.delete({
       where: {
@@ -136,7 +158,7 @@ districtRouter.delete('/', async (req, res) => {
     return res.json(deletedDistrict);
   } catch (error) {
     console.log(error);
-    return res.status(500).send('Something went wrong');
+    return res.status(500).send("Something went wrong");
   }
 });
 

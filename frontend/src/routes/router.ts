@@ -4,6 +4,7 @@ import {homeRoute} from './homeRoute';
 import {loginRoute} from './loginRoute';
 import {signupRoute} from './signupRoute';
 import {districts, districtsSingle} from './districtsRoute';
+import {members, membersSingle} from './membersRoute';
 
 const routeTree = rootRoute.addChildren([
   homeRoute,
@@ -11,6 +12,8 @@ const routeTree = rootRoute.addChildren([
   signupRoute,
   districts,
   districtsSingle,
+  members,
+  membersSingle,
 ]);
 
 export const router = new Router({routeTree});

@@ -1,22 +1,14 @@
-import {Navigate} from '@tanstack/react-router';
-import {useAuth} from '../hooks/useAuth';
-import {PageTitle} from '../components/PageTitle';
-import {PageBody} from '../components/PageBody';
-import {useEffect} from 'react';
-import {useAPI} from '../hooks/useAPI';
-
-type DistrictsResponse = {
-  id: string;
-  name: string;
-  districtManagerId: string | null;
-}[];
+import { Link, Navigate } from '@tanstack/react-router';
+import { useAuth } from '../hooks/useAuth';
+import { PageTitle } from '../components/PageTitle';
+import { PageBody } from '../components/PageBody';
+import { useAPI } from '../hooks/useAPI';
+import { AddDistrict } from '../components/AddDistrict';
+import { DistrictsResponse } from '../types/ResponseTypes';
 
 export function Districts() {
-  const {isUserLoggedIn} = useAuth();
-
-  const {data, error, loading} = useAPI<DistrictsResponse>('/districts', {
-    method: 'GET',
-  });
+  const { isUserLoggedIn } = useAuth();
+  const { data, error, loading, refetch } = useAPI<DistrictsResponse>('/districts');
 
   return (
     <PageBody>
@@ -35,26 +27,21 @@ export function Districts() {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td className="p-2 border">1</td>
-              <td className="p-2 border">Liptovsky Mikulas - 1</td>
-              <td className="p-2 border">Meno Priezvisko</td>
-            </tr>
-            <tr>
-              <td className="p-2 border">2</td>
-              <td className="p-2 border">Liptovsky Mikulas - 2</td>
-              <td className="p-2 border">Meno Priezvisko</td>
-            </tr>
-            {data.map((district) => (
-              <tr key={district.id}>
-                <td>{district.id}</td>
-                <td>{district.name}</td>
-                <td>{district.districtManagerId}</td>
+            {data.length !== 0 ? data.map((district) => (
+              <tr key={district.id} className='hover:bg-slate-50'>
+                <td className='p-2 border'>{district.id}</td>
+                <td className='border'>
+                  <Link to='/districts/$id' params={{ id: district.id }} className='w-full block p-2 hover:underline'>
+                    {district.name}
+                  </Link>
+                </td>
+                <td className='p-2 border'>{district.districtManagerId ? `${district.districtManager?.name} ${district.districtManager?.surname}` : '-----'}</td>
               </tr>
-            ))}
+            )) : <tr><td className='p-2 border' colSpan={3}>No districts found</td></tr>}
           </tbody>
         </table>
       )}
+      <AddDistrict refetchDistricts={refetch} />
     </PageBody>
   );
 }

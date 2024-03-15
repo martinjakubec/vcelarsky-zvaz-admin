@@ -7,7 +7,24 @@ const memberRouter = express.Router();
 memberRouter.get('/', async (req, res) => {
   if (!res.locals.isUserLoggedIn) return res.status(401).send('Unauthorized');
   try {
-    const members = await prismaClient.member.findMany();
+    const members = await prismaClient.member.findMany({
+      where: {
+        deletedAt: null,
+      },
+      select: {
+        deletedAt: false,
+        address: true,
+        district: true,
+        email: true,
+        id: true,
+        name: true,
+        phone: true,
+        surname: true,
+        districtId: true,
+        isManager: true,
+        managerDistrict: true,
+      },
+    });
     return res.json(members);
   } catch (error) {
     console.log(error);
@@ -21,6 +38,11 @@ memberRouter.get('/:farmId', async (req, res) => {
     const member = await prismaClient.member.findUnique({
       where: {
         id: req.params.farmId,
+        deletedAt: null,
+      },
+      include: {
+        district: true,
+        managerDistrict: true,
       },
     });
     if (!member) return res.status(404).send('Member not found');

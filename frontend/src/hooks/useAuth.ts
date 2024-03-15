@@ -1,5 +1,5 @@
 import {Context, useContext, useEffect} from 'react';
-import {getLoginToken, removeLoginToken} from '../utils/localStorageUtils';
+import {getLoginToken, removeLoginToken, setLoginToken} from '../utils/localStorageUtils';
 import {decodeTokenPayload} from '../utils/decodeTokenPayload';
 import {UserContext, UserContextType} from '../App';
 import {Navigate, redirect, resolvePath} from '@tanstack/react-router';
@@ -36,8 +36,7 @@ export function useAuth() {
           const response = await verifyRequest.json();
           const decodedToken = decodeTokenPayload(response.token);
           if (decodedToken) {
-            console.log('everything is fine, user is logged in');
-
+            setLoginToken(response.token)
             context.setIsUserLoggedIn(true);
             context.setUsername(decodedToken.username);
           } else {

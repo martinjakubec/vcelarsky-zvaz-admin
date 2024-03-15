@@ -1,9 +1,17 @@
 import {Route} from '@tanstack/react-router';
 import {rootRoute} from './rootRoute';
 import {Home} from '../pages/Home';
+import { Members } from '../pages/Members';
+import { MembersSingle } from '../pages/MembersSingle';
 
-export const homeRoute = new Route({
+export const members = new Route({
   getParentRoute: () => rootRoute,
-  path: '/',
-  component: Home,
+  path: '/members',
+  component: Members,
+});
+
+export const membersSingle = new Route({
+  getParentRoute: () => rootRoute,
+  path: '/members/$id',
+  component: MembersSingle,
 });

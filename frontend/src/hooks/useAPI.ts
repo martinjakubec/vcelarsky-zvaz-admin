@@ -1,28 +1,26 @@
-import {useEffect, useState} from 'react';
-import {getLoginToken} from '../utils/localStorageUtils';
+import { useEffect, useState } from "react";
+import { getLoginToken } from "../utils/localStorageUtils";
 
 export interface UseFetchOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   body?: unknown;
   headers?: Record<string, string>;
 }
 
-export function useAPI<Data>(url: string, options: UseFetchOptions) {
+export function useAPI<Data>(url: string, options?: UseFetchOptions) {
   const [data, setData] = useState<Data | null>(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [refetch, setRefetch] = useState<() => Promise<void>>(async () => {});
 
   useEffect(() => {
-    console.log('woohooo');
-
     const token = getLoginToken();
     async function fetchData() {
       setLoading(true);
       try {
         const request = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
-          method: options.method,
+          method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `${token}`,
           },
         });
@@ -38,8 +36,9 @@ export function useAPI<Data>(url: string, options: UseFetchOptions) {
         setLoading(false);
       }
     }
+    setRefetch(() => fetchData);
     fetchData();
   }, []);
 
-  return {data, error, loading};
+  return { data, error, loading, refetch };
 }
