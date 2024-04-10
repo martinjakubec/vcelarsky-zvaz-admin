@@ -3,4 +3,8 @@ declare namespace Express {
     isUserLoggedIn: boolean;
     username: string;
   }
+
+  export interface Request {
+    requestTime: number;
+  }
 }

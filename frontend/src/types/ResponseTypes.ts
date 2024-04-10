@@ -19,9 +19,13 @@ export type MembersResponse = {
     deletedAt: Date | null;
   } | null;
   id: string;
+  oldId: string;
+  title: string;
   name: string;
   surname: string;
-  address: string;
+  addressCity: string;
+  addressStreet: string;
+  addressZip: string;
   phone: string | null;
   email: string | null;
   districtId: string | null;
@@ -40,7 +44,9 @@ export type SingleDistrictResponse =
         id: string;
         name: string;
         surname: string;
-        address: string;
+        addressCity: string;
+        addressStreet: string;
+        addressZip: string;
         phone: string | null;
         email: string | null;
         districtId: string | null;
@@ -51,7 +57,9 @@ export type SingleDistrictResponse =
         id: string;
         name: string;
         surname: string;
-        address: string;
+        addressCity: string;
+        addressStreet: string;
+        addressZip: string;
         phone: string | null;
         email: string | null;
         districtId: string | null;
@@ -82,9 +90,13 @@ export type SingleMemberResponse =
       }[];
     } & {
       id: string;
+      oldId: string;
       name: string;
       surname: string;
-      address: string;
+      title: string;
+      addressCity: string;
+      addressStreet: string;
+      addressZip: string;
       phone: string | null;
       email: string | null;
       districtId: string | null;
@@ -92,3 +104,13 @@ export type SingleMemberResponse =
       isManager: boolean;
     })
   | null;
+
+export type AdminData = {
+  year: string;
+  treatingAmount: number;
+  pollinationAmount: number;
+  membershipLocal: number;
+  membershipCountry: number;
+};
+
+export type AdminResponse = AdminData[];

@@ -4,6 +4,7 @@ import {decodeTokenPayload} from '../utils/decodeTokenPayload';
 import {setLoginToken} from '../utils/localStorageUtils';
 import {useAuth} from '../hooks/useAuth';
 import {Link, Navigate, redirect} from '@tanstack/react-router';
+import { fetchAPI } from '../utils/fetchAPI';
 
 export function LoginPage() {
   const {username, isUserLoggedIn, setUsername, setIsUserLoggedIn} =
@@ -17,11 +18,11 @@ export function LoginPage() {
     const username = form.username.value;
     const password = form.password.value;
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
+    const response = await fetchAPI('/login', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({username, password}),
     });
+
     if (response.ok) {
       const {token} = await response.json();
       const decodedToken = decodeTokenPayload(token);
@@ -30,6 +31,8 @@ export function LoginPage() {
         setUsername(decodedToken.username);
         setIsUserLoggedIn(true);
       }
+    } else {
+      console.error(await response.text());
     }
   }
 

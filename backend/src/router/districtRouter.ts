@@ -41,9 +41,9 @@ districtRouter.get("/:districtId", async (req, res) => {
         members: {
           where: {
             deletedAt: null,
-          }
-        }
-      }
+          },
+        },
+      },
     });
     if (!district) return res.status(404).send("District not found");
     return res.json(district);
@@ -92,7 +92,7 @@ districtRouter.put("/:districtId", async (req, res) => {
   const { districtId } = req.params;
   if (!req.body) return res.status(400).send("Bad request");
 
-  const { name, managerId, newId } = req.body;
+  const { name, managerId, id: newId } = req.body;
   if (name === null) return res.status(400).send("Name is required");
 
   try {
@@ -125,10 +125,9 @@ districtRouter.put("/:districtId", async (req, res) => {
       data: {
         id: newId.toString(),
         name,
-        districtManager: {
-          connect: managerId ? { id: managerId.toString() } : undefined,
-          disconnect: managerId === null ? true : undefined,
-        },
+        districtManager: managerId
+          ? { connect: { id: managerId.toString() } }
+          : { disconnect: true },
       },
     });
 

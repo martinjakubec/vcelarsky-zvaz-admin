@@ -1,5 +1,6 @@
 import { useAPI } from "../hooks/useAPI";
 import { MembersResponse } from "../types/ResponseTypes";
+import { fetchAPI } from "../utils/fetchAPI";
 import { getLoginToken } from "../utils/localStorageUtils";
 
 export function AddDistrict({ refetchDistricts }: { refetchDistricts: () => Promise<void> }) {
@@ -10,17 +11,15 @@ export function AddDistrict({ refetchDistricts }: { refetchDistricts: () => Prom
     const id = form.districtId.value;
     const districtManagerId = form.districtManagerId.value;
 
-    console.log(JSON.stringify({ name, id, districtManagerId }));
-
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/districts`, {
+    const response = await fetchAPI('/districts', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `${getLoginToken()}` },
       body: JSON.stringify({ name, id, districtManagerId }),
     });
 
     if (response.ok) {
-      console.log(response.body)
+      console.log(await response.json())
       refetchDistricts()
+      form.reset();
     } else {
       const error = await response.text();
       console.log(error);
@@ -45,8 +44,8 @@ export function AddDistrict({ refetchDistricts }: { refetchDistricts: () => Prom
         <select className="p-1 border border-gray-300 rounded" id="districtManagerId" name="districtManagerId">
           <option value="">---</option>
           {
-            data && data.length !== 0 ? data.map((user) => (
-              <option key={user.id} value={user.id}>{user.name}</option>
+            data ? data.map((user) => (
+              <option key={user.id} value={user.id}>{user.id} - {user.name} {user.surname}</option>
             )) : <option value="" disabled>Loading...</option>
           }
         </select>

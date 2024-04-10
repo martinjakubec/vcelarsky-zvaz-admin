@@ -5,6 +5,7 @@ import {useContext, useState} from 'react';
 import {UserContext} from '../App';
 import {decodeTokenPayload} from '../utils/decodeTokenPayload';
 import {setLoginToken} from '../utils/localStorageUtils';
+import { fetchAPI } from '../utils/fetchAPI';
 
 export function Signup() {
   const {isUserLoggedIn, setIsUserLoggedIn, setUsername, username} =
@@ -20,11 +21,8 @@ export function Signup() {
     const password = form.password.value;
     const passwordConfirmation = form.passwordConfirmation.value;
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({username, password, passwordConfirmation}),
-    });
+    const response = await fetchAPI('/users', {body: JSON.stringify({username, password, passwordConfirmation}), method: 'POST'});
+
     if (response.ok) {
       setSuccess('Account created successfully');
       setError(null);

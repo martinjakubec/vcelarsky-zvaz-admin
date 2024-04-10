@@ -9,9 +9,12 @@ generator client {
 
 model Member {
   id              String     @id
+  oldId           String?
   name            String
   surname         String
-  address         String
+  addressCity     String
+  addressZip      String
+  addressStreet   String
   phone           String?
   email           String?
   district        District?  @relation(fields: [districtId], references: [id], name: "SimpleMembers")
@@ -19,6 +22,8 @@ model Member {
   managerDistrict District[] @relation(name: "DistrictManager")
   deletedAt       DateTime?
   isManager       Boolean    @default(false)
+  title           String?
+
 }
 
 model District {
@@ -35,4 +40,12 @@ model User {
   username  String    @unique
   password  String
   deletedAt DateTime?
+}
+
+model AdminData {
+  year              String @id
+  treatingAmount    Float @default(0)
+  pollinationAmount Float @default(0)
+  membershipLocal   Float @default(0)
+  membershipCountry Float @default(0)
 }

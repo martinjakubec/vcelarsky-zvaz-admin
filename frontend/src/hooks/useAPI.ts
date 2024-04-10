@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { getLoginToken } from "../utils/localStorageUtils";
+import { fetchAPI } from "../utils/fetchAPI";
 
 export interface UseFetchOptions {
   body?: unknown;
-  headers?: Record<string, string>;
 }
 
 export function useAPI<Data>(url: string, options?: UseFetchOptions) {
@@ -13,24 +13,20 @@ export function useAPI<Data>(url: string, options?: UseFetchOptions) {
   const [refetch, setRefetch] = useState<() => Promise<void>>(async () => {});
 
   useEffect(() => {
-    const token = getLoginToken();
     async function fetchData() {
       setLoading(true);
       try {
-        const request = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
-          method: 'GET',
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `${token}`,
-          },
-        });
+        const request = await fetchAPI(url);
         if (request.ok) {
           const response = await request.json();
+          setLoading(false);
           setData(response);
         } else {
+          setLoading(false);
           setError(request.statusText);
         }
       } catch (error) {
+        setLoading(false);
         setError(error as unknown as string);
       } finally {
         setLoading(false);

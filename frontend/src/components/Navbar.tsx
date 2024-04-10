@@ -13,11 +13,17 @@ export function Navbar() {
         <Link to="/" className="[&.active]:font-bold">
           Home
         </Link>
+        <Link to='/reports' className='[&.active]:font-bold'>
+          Reports
+        </Link>
         <Link to="/districts" className="[&.active]:font-bold">
           Districts
         </Link>
         <Link to="/members" className="[&.active]:font-bold">
           Members
+        </Link>
+        <Link to="/admin" className="[&.active]:font-bold">
+          Admin
         </Link>
         <div className="ml-auto">
           {!isUserLoggedIn ? (

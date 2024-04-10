@@ -1,10 +1,10 @@
-import {Navigate} from '@tanstack/react-router';
-import {useAuth} from '../hooks/useAuth';
-import {PageTitle} from '../components/PageTitle';
-import {PageBody} from '../components/PageBody';
+import { Navigate } from '@tanstack/react-router';
+import { useAuth } from '../hooks/useAuth';
+import { PageTitle } from '../components/PageTitle';
+import { PageBody } from '../components/PageBody';
 
 export function Home() {
-  const {isUserLoggedIn} = useAuth();
+  const { isUserLoggedIn } = useAuth();
 
   return (
     <PageBody>
