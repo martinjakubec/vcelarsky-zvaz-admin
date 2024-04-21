@@ -1,6 +1,6 @@
 import express from "express";
 import { sign } from "jsonwebtoken";
-import { JWT_SECRET } from "../contants";
+import { JWT_SECRET } from "../constants";
 import { TokenPayload } from "../types/tokenPayload";
 
 const verifyRouter = express.Router();

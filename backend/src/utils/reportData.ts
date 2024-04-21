@@ -1,27 +1,33 @@
-import { AdminData, Member, Prisma } from "@prisma/client";
-import { CsvData } from "./parseCsv";
+import {AdminData, Member, Prisma} from '@prisma/client';
+import {CsvData} from './parseCsv';
 
-interface MemberData {
+export interface MemberData {
   member: Member;
+  numberOfHives: number;
 }
 
-type FeesData = MemberData & {
+export type FeesData = MemberData & {
   localFee: number;
   countryFee: number;
+  voluntaryDonationInter: number;
+  voluntaryDonationExter: number;
 };
 
-type PollinationSubsidiesData = MemberData & {
+export type PollinationSubsidiesData = MemberData & {
   pollinationSubsidies: number;
 };
 
-type TreatingSubsidiesData = MemberData & {
+export type TreatingSubsidiesData = MemberData & {
   treatingSubsidies: number;
 };
 
-type AllData = FeesData | TreatingSubsidiesData | PollinationSubsidiesData;
+export type AllData =
+  | FeesData
+  | TreatingSubsidiesData
+  | PollinationSubsidiesData;
 
-type DataPerDistrict = {
-  [districtId: string]: AllData[];
+export type DataPerDistrict<T> = {
+  [districtId: string]: T[];
 };
 
 export function calculateFees(
@@ -37,18 +43,23 @@ export function calculateFees(
 
     if (!csvMember) continue;
 
-    const localFee =
-      (adminData.membershipLocal * 100 * csvMember.hiveAmount) / 100;
-    const countryFee = adminData.membershipCountry;
+    const countryFee =
+      (adminData.membershipCountry * 100 * csvMember.hiveAmount) / 100;
+    const localFee = adminData.membershipLocal;
 
     feesData.push({
       member,
+      numberOfHives: csvMember.hiveAmount,
       localFee,
       countryFee,
+      voluntaryDonationInter: adminData.voluntaryDonationInter,
+      voluntaryDonationExter: adminData.voluntaryDonationExter,
     });
   }
 
-  return feesData;
+  return feesData.toSorted((memberA, memberB) => {
+    return memberA.member.surname.localeCompare(memberB.member.surname);
+  });
 }
 
 export function calculateTreatingSubsidies(
@@ -67,11 +78,14 @@ export function calculateTreatingSubsidies(
       (adminData.treatingAmount * 100 * csvMember.hiveAmount) / 100;
 
     treatingSubsidiesData.push({
+      numberOfHives: csvMember.hiveAmount,
       member,
       treatingSubsidies,
     });
   }
-  return treatingSubsidiesData;
+  return treatingSubsidiesData.toSorted((memberA, memberB) => {
+    return memberA.member.surname.localeCompare(memberB.member.surname);
+  });
 }
 
 export function calculatePollinationSubsidies(
@@ -90,16 +104,21 @@ export function calculatePollinationSubsidies(
       (adminData.pollinationAmount * 100 * csvMember.hiveAmount) / 100;
 
     pollinationSubsidiesData.push({
+      numberOfHives: csvMember.hiveAmount,
       member,
       pollinationSubsidies,
     });
   }
 
-  return pollinationSubsidiesData;
+  return pollinationSubsidiesData.toSorted((memberA, memberB) => {
+    return memberA.member.surname.localeCompare(memberB.member.surname);
+  });
 }
 
-export function sortDataIntoDistricts(memberData: AllData[]): DataPerDistrict {
-  const dataPerDistrict: DataPerDistrict = {};
+export function sortDataIntoDistricts<DataType extends AllData>(
+  memberData: DataType[]
+): DataPerDistrict<DataType> {
+  const dataPerDistrict: DataPerDistrict<DataType> = {};
   for (let data of memberData) {
     const districtId = data.member.districtId?.toString();
     if (!districtId) continue;

@@ -19,6 +19,7 @@ export function AddMember({ refetchMembers }: { refetchMembers: () => Promise<vo
     const districtId = form.districtId.value;
     const title = form.nameTitle.value;
     const oldId = form.oldMemberId.value;
+    const birthDate = form.birthDate.value;
 
 
     const response = await fetchAPI('/members', {
@@ -56,6 +57,10 @@ export function AddMember({ refetchMembers }: { refetchMembers: () => Promise<vo
       <div>
         <label htmlFor="email">Email</label>
         <input className="p-1 border border-gray-300 rounded" type="email" id="email" name="email" />
+      </div>
+      <div>
+        <label htmlFor="birthDate">Date of birth</label>
+        <input className="p-1 border border-gray-300 rounded" type="date" id="birthDate" name="birthDate" />
       </div>
       <div>
         <label htmlFor="memberId">ID</label>

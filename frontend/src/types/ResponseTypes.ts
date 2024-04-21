@@ -36,6 +36,7 @@ export type MembersResponse = {
     districtManagerId: string | null;
     deletedAt: Date | null;
   }[];
+  birthDate: Date | null;
 }[];
 
 export type SingleDistrictResponse =
@@ -100,8 +101,9 @@ export type SingleMemberResponse =
       phone: string | null;
       email: string | null;
       districtId: string | null;
-      deletedAt: Date | null;
+      deletedAt: string | null;
       isManager: boolean;
+      birthDate: string | null;
     })
   | null;
 
@@ -111,6 +113,8 @@ export type AdminData = {
   pollinationAmount: number;
   membershipLocal: number;
   membershipCountry: number;
+  voluntaryDonationInter: number;
+  voluntaryDonationExter: number;
 };
 
 export type AdminResponse = AdminData[];

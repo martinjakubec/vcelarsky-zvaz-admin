@@ -1,2 +1,0 @@
-import typst from 'typst'
-

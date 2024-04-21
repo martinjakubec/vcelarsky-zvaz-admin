@@ -1,6 +1,6 @@
 import express from "express";
 import { TokenExpiredError, sign, verify } from "jsonwebtoken";
-import { JWT_SECRET } from "../contants";
+import { JWT_SECRET } from "../constants";
 import prismaClient from "../prismaClient";
 import { compare } from "bcrypt";
 import { TokenPayload } from "../types/tokenPayload";

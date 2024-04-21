@@ -1,6 +1,6 @@
 import {NextFunction, Request, Response} from 'express';
 import {JsonWebTokenError, TokenExpiredError, verify} from 'jsonwebtoken';
-import {JWT_SECRET} from '../contants';
+import {JWT_SECRET} from '../constants';
 
 const authMiddleware = async (
   req: Request,
