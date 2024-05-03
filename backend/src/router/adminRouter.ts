@@ -71,6 +71,7 @@ adminRouter.put('/:year', async (req, res) => {
     membershipCountry,
     voluntaryDonationInter,
     voluntaryDonationExter,
+    decreeNumber,
   } = req.body;
   if (!treatingAmount)
     return res.status(400).send('Treating amount is required');
@@ -85,6 +86,7 @@ adminRouter.put('/:year', async (req, res) => {
     return res.status(400).send('Internal voluntary donation is required');
   if (!voluntaryDonationExter)
     return res.status(400).send('External voluntary donation is required');
+  if (!decreeNumber) return res.status(400).send('Decree is required');
 
   const parsedData = {
     year: newYear || undefined,
@@ -94,12 +96,13 @@ adminRouter.put('/:year', async (req, res) => {
     membershipCountry: parseFloat(membershipCountry) || undefined,
     voluntaryDonationInter: parseFloat(voluntaryDonationInter) || undefined,
     voluntaryDonationExter: parseFloat(voluntaryDonationExter) || undefined,
+    decreeNumber: decreeNumber || undefined,
   };
 
   try {
     const adminData = await prismaClient.adminData.update({
       where: {year},
-      data: parsedData,
+      data: {...parsedData},
     });
     return res.json(adminData);
   } catch (err) {

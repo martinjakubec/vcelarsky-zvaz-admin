@@ -44,6 +44,7 @@ export function AdminPage() {
     const membershipCountry = form.membershipCountry.value;
     const voluntaryDonationInter = form.voluntaryDonationInter.value;
     const voluntaryDonationExter = form.voluntaryDonationExter.value;
+    const decreeNumber = form.decreeNumber.value;
 
     await fetchAPI(`/admin/${selectedData?.year}`, {
       method: 'PUT',
@@ -55,6 +56,7 @@ export function AdminPage() {
         membershipCountry,
         voluntaryDonationInter,
         voluntaryDonationExter,
+        decreeNumber,
       }),
     });
 
@@ -109,6 +111,7 @@ export function AdminPage() {
               Voluntary donation exter amount:{' '}
               {selectedData.voluntaryDonationExter}
             </p>
+            <p>Decree number: {selectedData.decreeNumber}</p>
           </div>
           <button type="button" onClick={() => setIsEditing(true)}>
             Edit
@@ -183,6 +186,15 @@ export function AdminPage() {
               id="voluntaryDonationExter"
               step="any"
               defaultValue={selectedData?.voluntaryDonationExter || ''}
+            />
+          </div>
+          <div>
+            <label htmlFor="decreeNumber">Decree number for this year:</label>
+            <input
+              className="p-1 border border-gray-300 rounded"
+              type="text"
+              id="decreeNumber"
+              defaultValue={selectedData?.decreeNumber || ''}
             />
           </div>
           <button type="submit">Save</button>

@@ -56,7 +56,7 @@ export function Members() {
                     {member.addressZip}
                   </td>
                   <td className="p-2 border">
-                    {member.isManager ? (
+                    {member.managerDistrict.length !== 0 ? (
                       <>
                         {member.managerDistrict.map((managerDistrict) => (
                           <div key={managerDistrict.id}>

@@ -24,7 +24,6 @@ memberRouter.get('/', async (req, res) => {
         phone: true,
         surname: true,
         districtId: true,
-        isManager: true,
         managerDistrict: true,
         oldId: true,
         title: true,

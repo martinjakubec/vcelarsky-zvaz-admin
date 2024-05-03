@@ -12,7 +12,7 @@ export type CsvData = CsvLine[];
 export async function parseCsvFile(filePath: string): Promise<CsvData> {
   try {
     const results: CsvLine[] = [];
-
+    
     const rs = await createInterface({
       input: createReadStream(filePath),
     });

@@ -29,7 +29,6 @@ export type MembersResponse = {
   phone: string | null;
   email: string | null;
   districtId: string | null;
-  isManager: boolean;
   managerDistrict: {
     id: string;
     name: string;
@@ -52,7 +51,6 @@ export type SingleDistrictResponse =
         email: string | null;
         districtId: string | null;
         deletedAt: Date | null;
-        isManager: boolean;
       }[];
       districtManager: {
         id: string;
@@ -65,7 +63,6 @@ export type SingleDistrictResponse =
         email: string | null;
         districtId: string | null;
         deletedAt: Date | null;
-        isManager: boolean;
       } | null;
     } & {
       id: string;
@@ -102,7 +99,6 @@ export type SingleMemberResponse =
       email: string | null;
       districtId: string | null;
       deletedAt: string | null;
-      isManager: boolean;
       birthDate: string | null;
     })
   | null;
@@ -115,6 +111,7 @@ export type AdminData = {
   membershipCountry: number;
   voluntaryDonationInter: number;
   voluntaryDonationExter: number;
+  decreeNumber: string;
 };
 
 export type AdminResponse = AdminData[];

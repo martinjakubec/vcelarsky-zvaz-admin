@@ -35,6 +35,15 @@ export function ReportPage() {
       contentType: null,
     });
     if (response.ok) {
+      const blob = await response.blob();
+      const file = new File([blob], 'reports.zip', {type: 'application/zip'});
+      const fileUrl = window.URL.createObjectURL(file);
+      let a: HTMLAnchorElement | null = document.createElement('a');
+      a.href = fileUrl;
+      a.download = 'reports.zip';
+      // a.click();
+      a.remove();
+      a = null;
       console.log('Report generated successfully');
     } else if (response.status === 404) {
       setFetchError(await response.text());

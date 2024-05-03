@@ -21,7 +21,6 @@ model Member {
   districtId      String?
   managerDistrict District[] @relation(name: "DistrictManager")
   deletedAt       DateTime?
-  isManager       Boolean    @default(false)
   title           String?
   birthDate       DateTime?
 }
@@ -50,4 +49,5 @@ model AdminData {
   membershipCountry      Float  @default(0)
   voluntaryDonationInter Float  @default(0)
   voluntaryDonationExter Float  @default(0)
+  decreeNumber           String @default("")
 }

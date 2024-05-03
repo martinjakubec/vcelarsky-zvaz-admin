@@ -19,6 +19,7 @@ export function AddAdminData({
     const membershipCountry = form.membershipCountry.value;
     const voluntaryDonationInter = form.voluntaryDonationInter.value;
     const voluntaryDonationExter = form.voluntaryDonationExter.value;
+    const decreeNumber = form.decreeNumber.value;
 
     const response = await fetchAPI('/admin', {
       method: 'POST',
@@ -30,6 +31,7 @@ export function AddAdminData({
         membershipCountry,
         voluntaryDonationInter,
         voluntaryDonationExter,
+        decreeNumber,
       }),
     });
 
@@ -126,6 +128,19 @@ export function AddAdminData({
           step="any"
           id="voluntaryDonationExter"
           name="voluntaryDonationExter"
+        />
+      </div>
+      <div>
+        <label htmlFor="decreeNumber">
+          Decree number for this year:
+        </label>
+        <input
+          required
+          className="p-1 border border-gray-300 rounded"
+          type="number"
+          step="any"
+          id="decreeNumber"
+          name="decreeNumber"
         />
       </div>
       <button type="submit" className="p-2 bg-blue-500 text-white">

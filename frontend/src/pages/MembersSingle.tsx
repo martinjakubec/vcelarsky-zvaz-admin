@@ -297,7 +297,7 @@ export function MembersSingle() {
                   '-'
                 )}
               </p>
-              {member.isManager && (
+              {member.managerDistrict.length !== 0 && (
                 <div>
                   Manager for:{' '}
                   <ul>

@@ -1,4 +1,9 @@
-import {DataPerDistrict, FeesData, PollinationSubsidiesData, TreatingSubsidiesData} from './reportData';
+import {
+  DataPerDistrict,
+  FeesData,
+  PollinationSubsidiesData,
+  TreatingSubsidiesData,
+} from './reportData';
 import prismaClient from '../prismaClient';
 import {
   createCountryFeesReport,
@@ -6,26 +11,43 @@ import {
   createSubsidiesReport,
 } from './pdfUtils';
 import path from 'path';
+import {access, mkdir} from 'fs/promises';
+import {DEFAULT_REPORTS_PATH} from '../constants';
 
-export type FeesReport = {
-  type: 'local' | 'country';
+export type PdfReport = {
+  type:
+    | 'localFees'
+    | 'countryFees'
+    | 'treatingSubsidies'
+    | 'pollinationSubsidies';
   filePath: string;
 };
+
+export async function createFolderIfNotExists(
+  path: string
+): Promise<void> {
+  try {
+    await access(path);
+  } catch (error) {
+    await mkdir(path);
+  }
+}
 
 export async function createFeesReportPdfs(
   data: DataPerDistrict<FeesData>,
   year: number,
   dataFromDate: Date
-): Promise<FeesReport[]> {
+): Promise<PdfReport[]> {
   const districtsNeeded = await prismaClient.district.findMany({
     where: {id: {in: Object.keys(data)}, deletedAt: null},
     orderBy: {id: 'asc'},
   });
   console.log('generating fees pdfs');
 
-  const defaultPath = path.join(__dirname, '..', '..', 'uploads');
-
-  const localFeesReportPath = path.join(defaultPath, 'fees-report-local.pdf');
+  const localFeesReportPath = path.join(
+    DEFAULT_REPORTS_PATH,
+    'fees-report-local.pdf'
+  );
 
   const localFeesReport = createLocalFeesReport({
     districts: districtsNeeded,
@@ -36,7 +58,7 @@ export async function createFeesReportPdfs(
   localFeesReport.save(localFeesReportPath);
 
   const countryFeesReportPath = path.join(
-    defaultPath,
+    DEFAULT_REPORTS_PATH,
     'fees-report-country.pdf'
   );
   const countryFeesReport = createCountryFeesReport({
@@ -47,20 +69,21 @@ export async function createFeesReportPdfs(
   });
   countryFeesReport.save(countryFeesReportPath);
 
-  return [{filePath: localFeesReportPath, type: 'local'}];
+  return [
+    {filePath: localFeesReportPath, type: 'localFees'},
+    {filePath: countryFeesReportPath, type: 'countryFees'},
+  ];
 }
 
 export async function createTreatingSubsidiesReportPdf(
   data: DataPerDistrict<TreatingSubsidiesData>,
   year: number,
   dataFromDate: Date
-) {
+): Promise<PdfReport> {
   console.log('generating treating subsidies pdfs');
 
-  const defaultPath = path.join(__dirname, '..', '..', 'uploads');
-
   const treatingSubsidiesReportPath = path.join(
-    defaultPath,
+    DEFAULT_REPORTS_PATH,
     'treating-subsidies-report.pdf'
   );
 
@@ -72,19 +95,19 @@ export async function createTreatingSubsidiesReportPdf(
   });
 
   treatingSubsidiesReport.save(treatingSubsidiesReportPath);
+
+  return {filePath: treatingSubsidiesReportPath, type: 'treatingSubsidies'};
 }
 
 export async function createPollinationSubsidiesReportPdf(
   data: DataPerDistrict<PollinationSubsidiesData>,
   year: number,
   dataFromDate: Date
-) {
+): Promise<PdfReport> {
   console.log('generating pollination subsidies pdfs');
 
-  const defaultPath = path.join(__dirname, '..', '..', 'uploads');
-
   const pollinationSubsidiesReportPath = path.join(
-    defaultPath,
+    DEFAULT_REPORTS_PATH,
     'pollination-subsidies-report.pdf'
   );
 
@@ -96,4 +119,9 @@ export async function createPollinationSubsidiesReportPdf(
   });
 
   pollinationSubsidiesReport.save(pollinationSubsidiesReportPath);
+  
+  return {
+    filePath: pollinationSubsidiesReportPath,
+    type: 'pollinationSubsidies',
+  };
 }
