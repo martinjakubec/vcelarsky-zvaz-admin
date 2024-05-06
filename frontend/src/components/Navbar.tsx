@@ -61,7 +61,7 @@ export function Navbar() {
           )}
         </div>
       </div>
-      {/* <hr className="border-t-2 border-yellow-500" /> */}
+      <hr className="border-t border-yellow-500" />
     </>
   );
 }

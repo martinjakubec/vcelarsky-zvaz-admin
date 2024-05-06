@@ -1,56 +1,87 @@
-import { useAPI } from "../hooks/useAPI";
-import { MembersResponse } from "../types/ResponseTypes";
-import { fetchAPI } from "../utils/fetchAPI";
-import { getLoginToken } from "../utils/localStorageUtils";
+import {useRef, useState} from 'react';
+import {useAPI} from '../hooks/useAPI';
+import {MembersResponse} from '../types/ResponseTypes';
+import {fetchAPI} from '../utils/fetchAPI';
+import {Button} from './Button';
+import {NumberInput} from './Input/NumberInput';
+import {SelectInput} from './Input/SelectInput';
+import {TextInput} from './Input/TextInput';
 
-export function AddDistrict({ refetchDistricts }: { refetchDistricts: () => Promise<void> }) {
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+interface AddDistrictProps {
+  refetchDistricts: () => Promise<void>;
+  closeModal?: () => void;
+}
+
+export function AddDistrict({refetchDistricts, closeModal}: AddDistrictProps) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = e.currentTarget;
-    const name = form.districtName.value;
-    const id = form.districtId.value;
-    const districtManagerId = form.districtManagerId.value;
+    const name = districtNameRef.current?.value;
+    const id = districtIdRef.current?.value;
+    const districtManagerId = districtManagerIdRef.current?.value;
+
+    console.log(name, id, districtManagerId);
 
     const response = await fetchAPI('/districts', {
       method: 'POST',
-      body: JSON.stringify({ name, id, districtManagerId }),
+      body: JSON.stringify({name, id, districtManagerId}),
     });
 
     if (response.ok) {
-      console.log(await response.json())
-      refetchDistricts()
-      form.reset();
+      console.log(await response.json());
+      refetchDistricts();
+      closeModal?.();
     } else {
       const error = await response.text();
       console.log(error);
+      setSubmitError(error);
     }
   }
 
-  const { data, error, loading } = useAPI<MembersResponse>('/members');
+  const [submitError, setSubmitError] = useState<string>('');
+
+  const {data, error, loading} = useAPI<MembersResponse>('/members');
+
+  const districtNameRef = useRef<HTMLInputElement>(null);
+  const districtIdRef = useRef<HTMLInputElement>(null);
+  const districtManagerIdRef = useRef<HTMLSelectElement>(null);
 
   return (
-    <form onSubmit={handleSubmit} className="border mt-4">
-      <h1>Add District</h1>
-      <div>
-        <label htmlFor="districtName">District Name</label>
-        <input required className="p-1 border border-gray-300 rounded" type="text" id="districtName" name="districtName" />
-      </div>
-      <div>
-        <label htmlFor="districtId">District ID</label>
-        <input required className="p-1 border border-gray-300 rounded" type="text" id="districtId" name="districtId" />
-      </div>
-      <div>
-        <label htmlFor="districtManagerId">District Manager</label>
-        <select className="p-1 border border-gray-300 rounded" id="districtManagerId" name="districtManagerId">
-          <option value="">---</option>
-          {
-            data ? data.map((user) => (
-              <option key={user.id} value={user.id}>{user.id} - {user.name} {user.surname}</option>
-            )) : <option value="" disabled>Loading...</option>
-          }
-        </select>
-      </div>
-      <button type="submit" className="p-1 border border-gray-300 rounded bg-blue-500 text-white">Add District</button>
+    <form onSubmit={handleSubmit} className="px-20 py-10">
+      <p className="text-lg font-bold">Nový obvod</p>
+      {error && <p className="text-red-500">{error}</p>}
+      {submitError && <p className="text-red-500">{submitError}</p>}
+      <TextInput
+        ref={districtNameRef}
+        required
+        defaultValue=""
+        id="districtName"
+        name="Názov obvodu"
+      />
+      <NumberInput
+        ref={districtIdRef}
+        required
+        id="districtId"
+        name="Číslo obvodu"
+      />
+      <SelectInput
+        ref={districtManagerIdRef}
+        id="districtManagerId"
+        name="Vedúci obvodu"
+        placeholder="---"
+      >
+        {data ? (
+          data.map((user) => (
+            <option key={user.id} value={user.id}>
+              {user.id} - {user.name} {user.surname}
+            </option>
+          ))
+        ) : (
+          <option value="" disabled>
+            Loading...
+          </option>
+        )}
+      </SelectInput>
+      <Button type="submit">Pridať obvod</Button>
     </form>
   );
-} 
+}

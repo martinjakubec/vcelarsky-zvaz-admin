@@ -33,6 +33,7 @@ export const SelectInput = forwardRef(function SelectInput(
         ref={ref}
         className="border-2 border-yellow-300 focus:border-yellow-500 px-2 py-1 outline-none"
         id={id}
+        name={id}
         defaultValue=""
         required={required}
         onChange={onChange}

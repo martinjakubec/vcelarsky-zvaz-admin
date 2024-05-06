@@ -1,8 +1,16 @@
 import {ForwardedRef, forwardRef} from 'react';
-import {InputProps} from './Input';
+
+interface TextInputProps {
+  name: string;
+  id: string;
+  defaultValue: string;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  required?: boolean;
+}
 
 export const TextInput = forwardRef(function TextInput(
-  {name, id, defaultValue, onChange, placeholder, required}: InputProps,
+  {name, id, defaultValue, onChange, placeholder, required}: TextInputProps,
   ref: ForwardedRef<HTMLInputElement>
 ) {
   return (
@@ -23,6 +31,7 @@ export const TextInput = forwardRef(function TextInput(
         type="text"
         placeholder={placeholder || undefined}
         onChange={onChange}
+        required={required}
       />
     </div>
   );

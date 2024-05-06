@@ -12,7 +12,13 @@ import {
 } from './pdfUtils';
 import path from 'path';
 import {access, mkdir} from 'fs/promises';
-import {DEFAULT_REPORTS_PATH} from '../constants';
+import {
+  COUNTRY_FEES_REPORT_FILENAME,
+  DEFAULT_REPORTS_PATH,
+  LOCAL_FEES_REPORT_FILENAME,
+  POLLINATION_REPORT_FILENAME,
+  TREATING_REPORT_FILENAME,
+} from '../constants';
 
 export type PdfReport = {
   type:
@@ -23,20 +29,19 @@ export type PdfReport = {
   filePath: string;
 };
 
-export async function createFolderIfNotExists(
-  path: string
-): Promise<void> {
+export async function createFolderIfNotExists(path: string): Promise<void> {
   try {
     await access(path);
   } catch (error) {
-    await mkdir(path);
+    await mkdir(path, {recursive: true});
   }
 }
 
 export async function createFeesReportPdfs(
   data: DataPerDistrict<FeesData>,
   year: number,
-  dataFromDate: Date
+  dataFromDate: Date,
+  requestId: string
 ): Promise<PdfReport[]> {
   const districtsNeeded = await prismaClient.district.findMany({
     where: {id: {in: Object.keys(data)}, deletedAt: null},
@@ -46,7 +51,8 @@ export async function createFeesReportPdfs(
 
   const localFeesReportPath = path.join(
     DEFAULT_REPORTS_PATH,
-    'fees-report-local.pdf'
+    requestId,
+    LOCAL_FEES_REPORT_FILENAME
   );
 
   const localFeesReport = createLocalFeesReport({
@@ -59,7 +65,8 @@ export async function createFeesReportPdfs(
 
   const countryFeesReportPath = path.join(
     DEFAULT_REPORTS_PATH,
-    'fees-report-country.pdf'
+    requestId,
+    COUNTRY_FEES_REPORT_FILENAME
   );
   const countryFeesReport = createCountryFeesReport({
     districts: districtsNeeded,
@@ -78,13 +85,15 @@ export async function createFeesReportPdfs(
 export async function createTreatingSubsidiesReportPdf(
   data: DataPerDistrict<TreatingSubsidiesData>,
   year: number,
-  dataFromDate: Date
+  dataFromDate: Date,
+  requestId: string
 ): Promise<PdfReport> {
   console.log('generating treating subsidies pdfs');
 
   const treatingSubsidiesReportPath = path.join(
     DEFAULT_REPORTS_PATH,
-    'treating-subsidies-report.pdf'
+    requestId,
+    TREATING_REPORT_FILENAME
   );
 
   const treatingSubsidiesReport = await createSubsidiesReport({
@@ -102,13 +111,15 @@ export async function createTreatingSubsidiesReportPdf(
 export async function createPollinationSubsidiesReportPdf(
   data: DataPerDistrict<PollinationSubsidiesData>,
   year: number,
-  dataFromDate: Date
+  dataFromDate: Date,
+  requestId: string
 ): Promise<PdfReport> {
   console.log('generating pollination subsidies pdfs');
 
   const pollinationSubsidiesReportPath = path.join(
     DEFAULT_REPORTS_PATH,
-    'pollination-subsidies-report.pdf'
+    requestId,
+    POLLINATION_REPORT_FILENAME
   );
 
   const pollinationSubsidiesReport = await createSubsidiesReport({
@@ -119,7 +130,7 @@ export async function createPollinationSubsidiesReportPdf(
   });
 
   pollinationSubsidiesReport.save(pollinationSubsidiesReportPath);
-  
+
   return {
     filePath: pollinationSubsidiesReportPath,
     type: 'pollinationSubsidies',

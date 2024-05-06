@@ -5,23 +5,18 @@ import {
   useRef,
   useState,
 } from 'react';
-import {InputProps} from './Input';
 
-interface FileInputProps extends InputProps {
+interface FileInputProps {
   accept?: string;
   uploadText?: string;
+  id: string;
+  name: string;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  required?: boolean;
 }
 
 export const FileInput = forwardRef(function FileInput(
-  {
-    defaultValue,
-    id,
-    name,
-    onChange,
-    required,
-    accept,
-    uploadText,
-  }: FileInputProps,
+  {id, name, onChange, required, accept, uploadText}: FileInputProps,
   ref: ForwardedRef<HTMLInputElement>
 ) {
   const [fileName, setFileName] = useState<string>(
@@ -56,17 +51,18 @@ export const FileInput = forwardRef(function FileInput(
       </label>
 
       <input
+        formNoValidate
         ref={internalRef}
-        className="hidden"
+        required={required}
+        className="w-[1px] h-[1px] relative left-24"
         id={id}
-        defaultValue={defaultValue}
+        name={id}
         type="file"
         accept={accept}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           onChange?.(e);
-          console.log(e.target.files?.[0]);
           setFileName(
-            e.target.files?.[0].name ||
+            e.target.files?.[0]?.name ||
               uploadText ||
               'Click here to upload a file'
           );

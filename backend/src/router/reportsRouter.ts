@@ -26,7 +26,7 @@ import AdmZip from 'adm-zip';
 const storage = multer.diskStorage({
   destination: DEFAULT_UPLOADS_PATH,
   filename: function (req, file, callback) {
-    const fileName = file.originalname.split('.').join(`-${req.requestTime}.`);
+    const fileName = file.originalname.split('.').join(`-${req.requestId}.`);
 
     callback(null, fileName);
   },
@@ -63,7 +63,7 @@ reportsRouter.post(
     try {
       const filePath = path.join(
         DEFAULT_UPLOADS_PATH,
-        `${req.file?.originalname.split('.')[0]}-${req.requestTime}.csv`
+        `${req.file?.originalname.split('.')[0]}-${req.requestId}.csv`
       );
 
       const csvData = await parseCsvFile(filePath);
@@ -91,7 +91,7 @@ reportsRouter.post(
         const feesData = sortDataIntoDistricts<FeesData>(
           calculateFees(csvData, memberData, adminData)
         );
-        await createFeesReportPdfs(feesData, year, dataFromDate);
+        await createFeesReportPdfs(feesData, year, dataFromDate, req.requestId);
       }
 
       if (pollinationSubsidies === 'true') {
@@ -103,7 +103,8 @@ reportsRouter.post(
         await createPollinationSubsidiesReportPdf(
           pollinationSubsidiesData,
           year,
-          dataFromDate
+          dataFromDate,
+          req.requestId
         );
       }
 
@@ -115,7 +116,8 @@ reportsRouter.post(
         await createTreatingSubsidiesReportPdf(
           treatingSubsidiesData,
           year,
-          dataFromDate
+          dataFromDate,
+          req.requestId
         );
       }
 
@@ -123,19 +125,22 @@ reportsRouter.post(
 
       const zip = new AdmZip();
 
-      await zip.addLocalFolder(DEFAULT_REPORTS_PATH);
-      // const bufferToSend = await zip.toBufferPromise();
-      zip.writeZip(path.join(DEFAULT_UPLOADS_PATH, 'reports.zip'));
-
-      // res.send(bufferToSend);
-      if (process.env.ENVIRONMENT !== 'development') {
-        await rm(DEFAULT_UPLOADS_PATH, {recursive: true});
-      }
+      await zip.addLocalFolder(path.join(DEFAULT_REPORTS_PATH, req.requestId));
+      zip.writeZip(
+        path.join(DEFAULT_REPORTS_PATH, req.requestId, 'reports.zip')
+      );
 
       return res
+        .on('finish', async () => {
+          await rm(path.join(DEFAULT_REPORTS_PATH, req.requestId), {
+            recursive: true,
+          });
+        })
         .header('Content-Disposition', 'attachment; filename="reports.zip"')
         .contentType('application/zip')
-        .sendFile(path.join(DEFAULT_UPLOADS_PATH, 'reports.zip'));
+        .sendFile(
+          path.join(DEFAULT_REPORTS_PATH, req.requestId, 'reports.zip')
+        );
     } catch (err) {
       console.error(err);
       return res.status(500).send('Something went wrong');

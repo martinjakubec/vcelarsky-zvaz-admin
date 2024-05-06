@@ -1,8 +1,16 @@
 import {ForwardedRef, forwardRef} from 'react';
-import {InputProps} from './Input';
+
+export interface NumberInputProps {
+  name: string;
+  id: string;
+  defaultValue?: number;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  required?: boolean;
+}
 
 export const NumberInput = forwardRef(function NumberInput(
-  {name, id, defaultValue, onChange, placeholder, required}: InputProps,
+  {name, id, defaultValue, onChange, placeholder, required}: NumberInputProps,
   ref: ForwardedRef<HTMLInputElement>
 ) {
   return (
@@ -19,11 +27,13 @@ export const NumberInput = forwardRef(function NumberInput(
         ref={ref}
         className="border-2 border-yellow-300 focus:border-yellow-500 px-2 py-1 outline-none"
         id={id}
+        name={id}
         defaultValue={defaultValue}
         type="number"
         step="any"
         placeholder={placeholder || undefined}
         onChange={onChange}
+        required={required}
       />
     </div>
   );

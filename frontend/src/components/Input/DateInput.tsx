@@ -1,8 +1,16 @@
 import {ForwardedRef, forwardRef} from 'react';
-import {InputProps} from './Input';
+
+interface DateInputProps {
+  name: string;
+  id: string;
+  defaultValue?: string;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  required?: boolean;
+}
 
 export const DateInput = forwardRef(function DateInput(
-  {name, id, defaultValue, onChange, placeholder, required}: InputProps,
+  {name, id, defaultValue, onChange, placeholder, required}: DateInputProps,
   ref: ForwardedRef<HTMLInputElement>
 ) {
   return (
@@ -16,6 +24,7 @@ export const DateInput = forwardRef(function DateInput(
         {name}
       </label>
       <input
+        name={id}
         ref={ref}
         className="border-2 border-yellow-300 focus:border-yellow-500 px-2 py-1 outline-none"
         id={id}
@@ -23,6 +32,7 @@ export const DateInput = forwardRef(function DateInput(
         type="date"
         placeholder={placeholder || undefined}
         onChange={onChange}
+        required={required}
       />
     </div>
   );

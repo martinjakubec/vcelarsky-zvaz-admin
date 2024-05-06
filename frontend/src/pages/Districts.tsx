@@ -1,25 +1,49 @@
-import { Link, Navigate } from "@tanstack/react-router";
-import { useAuth } from "../hooks/useAuth";
-import { PageTitle } from "../components/PageTitle";
-import { PageBody } from "../components/PageBody";
-import { useAPI } from "../hooks/useAPI";
-import { AddDistrict } from "../components/AddDistrict";
-import { DistrictsResponse } from "../types/ResponseTypes";
+import {Link, Navigate} from '@tanstack/react-router';
+import {useAuth} from '../hooks/useAuth';
+import {PageTitle} from '../components/PageTitle';
+import {PageBody} from '../components/PageBody';
+import {useAPI} from '../hooks/useAPI';
+import {AddDistrict} from '../components/AddDistrict';
+import {DistrictsResponse} from '../types/ResponseTypes';
+import {useRef} from 'react';
+import {Button} from '../components/Button';
 
 export function Districts() {
-  const { isUserLoggedIn } = useAuth();
-  const { data, error, loading, refetch } =
-    useAPI<DistrictsResponse>("/districts");
+  const {isUserLoggedIn} = useAuth();
+  const {data, error, loading, refetch} =
+    useAPI<DistrictsResponse>('/districts');
+
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
   return (
     <PageBody>
       {!isUserLoggedIn && <Navigate to="/login" />}
+      <dialog
+        ref={dialogRef}
+        id="dialog"
+        className="p-4 bg-white rounded-md relative"
+      >
+        <button
+          onClick={() => {
+            dialogRef.current?.close();
+          }}
+          className="absolute top-5 right-5 text-sm"
+        >
+          Zatvoriť
+        </button>
+        <AddDistrict
+          refetchDistricts={refetch}
+          closeModal={() => {
+            dialogRef.current?.close();
+          }}
+        />
+      </dialog>
       <PageTitle>Districts</PageTitle>
       <p>List of districts</p>
       {loading && <p>Loading...</p>}
       {error && <p>Error: {error}</p>}
       {data && (
-        <table className="w-full">
+        <table className="w-full mb-2">
           <thead>
             <tr>
               <th className="p-2 border text-left">District ID</th>
@@ -35,7 +59,7 @@ export function Districts() {
                   <td className="border">
                     <Link
                       to="/districts/$id"
-                      params={{ id: district.id }}
+                      params={{id: district.id}}
                       className="w-full block p-2 hover:underline"
                     >
                       {district.name}
@@ -44,7 +68,7 @@ export function Districts() {
                   <td className="p-2 border">
                     {district.districtManagerId
                       ? `${district.districtManager?.name} ${district.districtManager?.surname}`
-                      : "-----"}
+                      : '-----'}
                   </td>
                 </tr>
               ))
@@ -58,7 +82,13 @@ export function Districts() {
           </tbody>
         </table>
       )}
-      <AddDistrict refetchDistricts={refetch} />
+      <Button
+        onClick={() => {
+          dialogRef.current?.showModal();
+        }}
+      >
+        Add District
+      </Button>
     </PageBody>
   );
 }

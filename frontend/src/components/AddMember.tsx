@@ -44,7 +44,7 @@ export function AddMember({ refetchMembers }: { refetchMembers: () => Promise<vo
       <h1>Add Member</h1>
       <div>
         <label htmlFor="nameTitle">Title</label>
-        <input required className="p-1 border border-gray-300 rounded" type="text" id="nameTitle" name="nameTitle" />
+        <input className="p-1 border border-gray-300 rounded" type="text" id="nameTitle" name="nameTitle" />
       </div>
       <div>
         <label htmlFor="firstName">First Name</label>

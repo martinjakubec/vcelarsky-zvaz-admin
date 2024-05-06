@@ -1,10 +1,11 @@
-import { NextFunction, Request, Response } from "express";
+import {randomUUID} from 'crypto';
+import {NextFunction, Request, Response} from 'express';
 
-export function requestTimeMiddleware(
+export function requestIdMiddleware(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
-  req.requestTime = (new Date()).getTime();
+  req.requestId = randomUUID();
   next();
 }

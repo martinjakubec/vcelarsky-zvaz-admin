@@ -6,13 +6,13 @@ import apiRouter from "./router/apiRouter";
 import authMiddleware from "./middleware/authMiddleware";
 import { debug } from "./utils/debug";
 import cors from "cors";
-import { requestTimeMiddleware } from "./middleware/requestTimeMiddleware";
+import { requestIdMiddleware } from "./middleware/requestTimeMiddleware";
 const app = express();
 
 app.use(express.json());
 app.use(cors({ origin: "*" }));
 app.use(authMiddleware);
-app.use(requestTimeMiddleware);
+app.use(requestIdMiddleware);
 app.use(debug);
 
 app.use("/api", apiRouter);

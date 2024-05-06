@@ -192,9 +192,11 @@ export function MembersSingle() {
                 type="date"
                 id="birthDate"
                 name="birthDate"
-                defaultValue={new Date(member?.birthDate || '')
-                  .toISOString()
-                  .substring(0, 10)}
+                defaultValue={
+                  member?.birthDate
+                    ? new Date(member.birthDate).toISOString().substring(0, 10)
+                    : ''
+                }
               />
             </div>
             <div>

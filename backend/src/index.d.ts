@@ -5,6 +5,6 @@ declare namespace Express {
   }
 
   export interface Request {
-    requestTime: number;
+    requestId: string;
   }
 }

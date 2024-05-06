@@ -6,7 +6,8 @@
   "scripts": {
     "bdev": "npm run -w backend dev",
     "fdev": "npm run -w frontend dev",
-    "migrate": "npm run -w backend prisma:migrate"
+    "migrate": "npm run -w backend prisma:migrate",
+    "generate": "npm run -w backend prisma:generate"
   },
   "repository": {
     "type": "git",

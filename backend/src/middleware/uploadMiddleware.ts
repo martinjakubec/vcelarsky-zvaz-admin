@@ -1,6 +1,7 @@
 import {NextFunction} from 'express';
 import {createFolderIfNotExists} from '../utils/createReports';
 import {DEFAULT_REPORTS_PATH, DEFAULT_UPLOADS_PATH} from '../constants';
+import path from 'path';
 
 export async function createFolderMiddleware(
   req: Express.Request,
@@ -8,8 +9,9 @@ export async function createFolderMiddleware(
   next: NextFunction
 ): Promise<void> {
   try {
-    await createFolderIfNotExists(DEFAULT_UPLOADS_PATH);
-    await createFolderIfNotExists(DEFAULT_REPORTS_PATH);
+    await createFolderIfNotExists(
+      path.join(DEFAULT_REPORTS_PATH, req.requestId)
+    );
     next();
   } catch (err) {
     next(err);
