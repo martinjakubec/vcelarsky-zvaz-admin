@@ -1,35 +1,63 @@
-import { Link, Navigate, useNavigate } from '@tanstack/react-router';
-import { useAuth } from '../hooks/useAuth';
-import { PageTitle } from '../components/PageTitle';
-import { PageBody } from '../components/PageBody';
-import { districtsSingle } from '../routes/districtsRoute';
-import { useAPI } from '../hooks/useAPI';
-import { MembersResponse, SingleDistrictResponse } from '../types/ResponseTypes';
-import { useState } from 'react';
-import { fetchAPI } from '../utils/fetchAPI';
+import {Link, Navigate, useNavigate} from '@tanstack/react-router';
+import {useAuth} from '../hooks/useAuth';
+import {PageTitle} from '../components/PageTitle';
+import {PageBody} from '../components/PageBody';
+import {districtsSingle} from '../routes/districtsRoute';
+import {useAPI} from '../hooks/useAPI';
+import {MembersResponse, SingleDistrictResponse} from '../types/ResponseTypes';
+import {useRef, useState} from 'react';
+import {fetchAPI} from '../utils/fetchAPI';
+import {Table} from '../components/Table/Table';
+import {TableHead} from '../components/Table/TableHead';
+import {Cell, HeadCell} from '../components/Table/TableCell';
+import {TableBody} from '../components/Table/TableBody';
+import {TableRow} from '../components/Table/TableRow';
+import {CellLink} from '../components/Table/CellLink';
+import {TextInput} from '../components/Input/TextInput';
+import {NumberInput} from '../components/Input/NumberInput';
+import {SelectInput} from '../components/Input/SelectInput';
+import {Button} from '../components/Button';
 
 export function DistrictsSingle() {
-  const { isUserLoggedIn } = useAuth();
+  const {isUserLoggedIn} = useAuth();
 
-  const { id } = districtsSingle.useParams();
+  const {id} = districtsSingle.useParams();
 
-  const { data: district, error: districtError, loading: districtLoading, refetch } = useAPI<SingleDistrictResponse>(`/districts/${id}`)
-  const { data: managers, error: managersError, loading: managersLoading } = useAPI<MembersResponse>("/members")
-
+  const {
+    data: district,
+    error: districtError,
+    loading: districtLoading,
+    refetch,
+  } = useAPI<SingleDistrictResponse>(`/districts/${id}`);
+  const {
+    data: managers,
+    error: managersError,
+    loading: managersLoading,
+  } = useAPI<MembersResponse>('/members');
 
   const [isEditing, setIsEditing] = useState(false);
   const [districtId, setDistrictId] = useState<string>(id);
-  const [districtSuccessfullyDeleted, setDistrictSuccessfullyDeleted] = useState<boolean>(false);
+  const [districtSuccessfullyDeleted, setDistrictSuccessfullyDeleted] =
+    useState<boolean>(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
+
+  const districtNameRef = useRef<HTMLInputElement>(null);
+  const districtIdRef = useRef<HTMLInputElement>(null);
+  const districtManagerIdRef = useRef<HTMLSelectElement>(null);
 
   async function handleDistrictEdit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setUpdateError(null);
-    
-    const districtName = e.currentTarget.districtName.value;
-    const districtId = e.currentTarget.districtId.value;
-    const districtManagerId = e.currentTarget.districtManager.value;
-    
+
+    const districtName = districtNameRef.current?.value;
+    const districtId = districtIdRef.current?.value;
+    const districtManagerId = districtManagerIdRef.current?.value;
+
+    if (!districtName || !districtId) {
+      setUpdateError('Vyplnte názov a číslo obvodu.');
+      return;
+    }
+
     const response = await fetchAPI(`/districts/${id}`, {
       method: 'PUT',
       body: JSON.stringify({
@@ -50,11 +78,11 @@ export function DistrictsSingle() {
   }
 
   async function handleDistrictDelete() {
-    if (!confirm('Are you sure you want to delete this member?')) return
+    if (!confirm('Určite chcete vymazať obvod?')) return;
     const response = await fetchAPI(`/districts`, {
       method: 'DELETE',
       body: JSON.stringify({
-        id
+        id,
       }),
     });
 
@@ -69,76 +97,134 @@ export function DistrictsSingle() {
     <PageBody>
       {!isUserLoggedIn && <Navigate to="/login" />}
       {districtSuccessfullyDeleted && <Navigate to="/districts" />}
-      <Link to="/districts" className='text-xs font-light hover:underline'> &lt; Back to districts</Link>
+      {districtError && <Navigate to="/districts" />}
       <PageTitle>
-        {id} - {district?.name} - {' '}
-        {isEditing ? (<button onClick={() => { setIsEditing(false) }}>Cancel edit</button>) : (<button onClick={() => { setIsEditing(true) }}>Edit</button>)} -{' '}
-        <button type='button' onClick={handleDistrictDelete}>Delete</button>
+        {district?.name} ({id})
       </PageTitle>
       {districtLoading && <p>Loading...</p>}
       {districtError && <p>Error: {districtError}</p>}
+      <h2 className="text-xl font-bold pt-2">Informácie o obvode</h2>
 
       {isEditing ? (
         <>
-          <p>District details</p>
           <form onSubmit={handleDistrictEdit}>
-            <div>
-              <label htmlFor="districtName">Name</label>
-              <input className="border border-1" type="text" id="districtName" name="districtName" defaultValue={district?.name} />
-            </div>
-            <div>
-              <label htmlFor="districtId">District ID</label>
-              <input className="border border-1" type="text" id="districtId" name="districtId" defaultValue={district?.id} />
-            </div>
-            <div>
-              <label htmlFor="districtManager">District Manager</label>
-              <select id='districtManager' name="districtManager" className='border border-1' defaultValue={district?.districtManagerId || ''}>
-                <option value="">---</option>
-                {managers && managers.map(manager => (
-                  <option key={manager.id} value={manager.id}>{manager.id} - {manager.name} {manager.surname}</option>
+            <p>{updateError}</p>
+            <TextInput
+              required
+              defaultValue={district?.name || ''}
+              id="districtName"
+              name="Názov obvodu"
+              ref={districtNameRef}
+            />
+            <NumberInput
+              required
+              defaultValue={parseInt(district?.id || '') || undefined}
+              id="districtId"
+              name="Číslo obvodu"
+              ref={districtIdRef}
+            />
+            <SelectInput
+              id="districtManager"
+              name="Vedúci obvodu"
+              ref={districtManagerIdRef}
+              defaultValue={district?.districtManagerId || ''}
+            >
+              <option value="">---</option>
+              {managers &&
+                managers.map((manager) => (
+                  <option key={manager.id} value={manager.id}>
+                    {manager.id} - {manager.name} {manager.surname}
+                  </option>
                 ))}
-              </select>
-            </div>
-            <button type="submit">Save</button>
+            </SelectInput>
+            <Button type="submit">Uložiť</Button>
+            <Button
+              onClick={() => {
+                setIsEditing(false);
+              }}
+              type="button"
+            >
+              Zrušiť úpravy
+            </Button>
           </form>
         </>
-      ) : <>
-        <h2 className='text-xl font-bold pt-2'>District details</h2>
-        {district &&
-          <div>
-            <p>{district.members.length} members</p>
-            <p>{district.districtManager ? `Manager: ${district.districtManager.name} ${district.districtManager.surname}` : 'No manager'}</p>
-          </div>
-        }
-
-        <h2 className='text-xl font-bold pt-2'>Members</h2>
-        {district && (
-          <table>
-            <thead>
-              <tr>
-                <th className='p-2 border'>ID</th>
-                <th className='p-2 border'>Name</th>
-                <th className='p-2 border'>Surname</th>
-                <th className='p-2 border'>Address</th>
-                <th className='p-2 border'>Phone</th>
-                <th className='p-2 border'>Email</th>
-              </tr>
-            </thead>
-            <tbody>
-              {district.members.map(member => (
-                <tr key={member.id}>
-                  <td className='p-2 border'><Link to='/members/$id' params={{ id: member.id }}>{member.id}</Link></td>
-                  <td className='p-2 border'>{member.name}</td>
-                  <td className='p-2 border'>{member.surname}</td>
-                  <td className='p-2 border'>{member.addressStreet}, {member.addressCity}, {member.addressZip}</td>
-                  <td className='p-2 border'>{member.phone}</td>
-                  <td className='p-2 border'>{member.email}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </>}
+      ) : (
+        <>
+          {district && (
+            <div>
+              <p>
+                <span className="font-bold">Počet členov: </span>
+                {district.members.length}
+              </p>
+              <p>
+                <span className="font-bold">Vedúci: </span>
+                {district.districtManager ? (
+                  <Link
+                    to="/members/$id"
+                    className="hover:underline"
+                    params={{id: district.districtManager.id}}
+                  >
+                    {district.districtManager.name}{' '}
+                    {district.districtManager.surname}
+                    {district.districtManager.title
+                      ? `, ${district.districtManager.title}`
+                      : ''}
+                  </Link>
+                ) : (
+                  '-'
+                )}
+              </p>
+              <Button
+                onClick={() => {
+                  setIsEditing(true);
+                }}
+              >
+                Upraviť
+              </Button>
+              <Button onClick={handleDistrictDelete}>Vymazať</Button>
+            </div>
+          )}
+        </>
+      )}
+      <h2 className="text-xl font-bold pt-2">Členovia</h2>
+      {district && (
+        <>
+          <Table>
+            <TableHead>
+              <HeadCell>Číslo farmy v CEHZ</HeadCell>
+              <HeadCell>Meno</HeadCell>
+              <HeadCell>Adresa</HeadCell>
+              <HeadCell>Tel. číslo</HeadCell>
+              <HeadCell>E-mail</HeadCell>
+            </TableHead>
+            <TableBody>
+              {district.members.map((member, index) => {
+                return (
+                  <TableRow key={member.id} index={index + 1}>
+                    <Cell>
+                      <CellLink to="/members/$id" params={{id: member.id}}>
+                        {member.id}
+                      </CellLink>
+                    </Cell>
+                    <Cell>
+                      <CellLink to="/members/$id" params={{id: member.id}}>
+                        {member.name} {member.surname}
+                        {member.title ? `, ${member.title}` : ''}
+                      </CellLink>
+                    </Cell>
+                    <Cell>
+                      {member.addressStreet}, {member.addressCity},{' '}
+                      {member.addressZip}
+                    </Cell>
+                    <Cell>{member.phone || '-'}</Cell>
+                    <Cell>{member.email || '-'}</Cell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </>
+      )}
     </PageBody>
   );
 }

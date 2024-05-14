@@ -6,6 +6,7 @@ export interface SelectProps {
   onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   id: string;
   required?: boolean;
+  defaultValue?: string;
 }
 
 export const SelectInput = forwardRef(function SelectInput(
@@ -16,6 +17,7 @@ export const SelectInput = forwardRef(function SelectInput(
     placeholder,
     required,
     children,
+    defaultValue,
   }: PropsWithChildren<SelectProps>,
   ref: ForwardedRef<HTMLSelectElement>
 ) {
@@ -34,7 +36,7 @@ export const SelectInput = forwardRef(function SelectInput(
         className="border-2 border-yellow-300 focus:border-yellow-500 px-2 py-1 outline-none"
         id={id}
         name={id}
-        defaultValue=""
+        defaultValue={defaultValue}
         required={required}
         onChange={onChange}
       >

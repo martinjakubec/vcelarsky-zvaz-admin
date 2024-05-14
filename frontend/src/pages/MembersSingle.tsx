@@ -98,9 +98,6 @@ export function MembersSingle() {
       )}
       {memberSuccessfullyDeleted && <Navigate to="/members" />}
       {!isUserLoggedIn && <Navigate to="/login" />}
-      <Link to="/members" className="text-xs font-light hover:underline">
-        &lt; Back to members
-      </Link>
 
       {member && (
         <PageTitle>
