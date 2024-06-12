@@ -84,17 +84,19 @@ export function Members() {
                   </Cell>
                   <Cell>
                     {member.managerDistrict.length !== 0 ? (
-                      <>
+                      <ul>
                         {member.managerDistrict.map((managerDistrict) => (
-                          <CellLink
-                            to={`/districts/$id`}
-                            params={{id: managerDistrict.id}}
-                            key={managerDistrict.id}
-                          >
-                            {managerDistrict.name}
-                          </CellLink>
+                          <li key={managerDistrict.id} className="m-2 list-disc list-inside">
+                            <Link
+                              to={`/districts/$id`}
+                              params={{id: managerDistrict.id}}
+                              className="hover:underline my-2"
+                            >
+                              {managerDistrict.name}
+                            </Link>
+                          </li>
                         ))}
-                      </>
+                      </ul>
                     ) : (
                       '-'
                     )}

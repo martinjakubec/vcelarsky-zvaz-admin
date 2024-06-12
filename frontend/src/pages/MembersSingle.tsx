@@ -4,9 +4,14 @@ import {PageTitle} from '../components/PageTitle';
 import {PageBody} from '../components/PageBody';
 import {useAPI} from '../hooks/useAPI';
 import {DistrictsResponse, SingleMemberResponse} from '../types/ResponseTypes';
-import {useState} from 'react';
+import {useRef, useState} from 'react';
 import {fetchAPI} from '../utils/fetchAPI';
 import {membersSingle} from '../routes/membersRoute';
+import {Button} from '../components/Button';
+import {TextInput} from '../components/Input/TextInput';
+import {DateInput} from '../components/Input/DateInput';
+import {EmailInput} from '../components/Input/EmailInput';
+import {SelectInput} from '../components/Input/SelectInput';
 
 export function MembersSingle() {
   const {isUserLoggedIn} = useAuth();
@@ -17,6 +22,9 @@ export function MembersSingle() {
   const [memberId, setMemberId] = useState<string>(id);
   const [memberSuccessfullyDeleted, setMemberSuccessfullyDeleted] =
     useState<boolean>(false);
+  const [memberDeletedError, setMemberDeletedError] = useState<string | null>(
+    null
+  );
 
   const {
     data: member,
@@ -31,22 +39,34 @@ export function MembersSingle() {
     loading: districtsLoading,
   } = useAPI<DistrictsResponse>('/districts');
 
+  const nameRef = useRef<HTMLInputElement>(null);
+  const surnameRef = useRef<HTMLInputElement>(null);
+  const addressCityRef = useRef<HTMLInputElement>(null);
+  const addressStreetRef = useRef<HTMLInputElement>(null);
+  const addressZipRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const districtRef = useRef<HTMLSelectElement>(null);
+  const memberIdRef = useRef<HTMLInputElement>(null);
+  const oldIdRef = useRef<HTMLInputElement>(null);
+  const titleRef = useRef<HTMLInputElement>(null);
+  const birthDateRef = useRef<HTMLInputElement>(null);
+
   async function handleMemberEdit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setUpdateError(null);
-    const form = e.currentTarget;
-    const name = form.firstName.value;
-    const surname = form.surname.value;
-    const addressCity = form.addressCity.value;
-    const addressStreet = form.addressStreet.value;
-    const addressZip = form.addressZip.value;
-    const phone = form.phone.value;
-    const email = form.email.value;
-    const district = form.district.value;
-    const memberId = form.memberId.value;
-    const oldId = form.oldId.value;
-    const title = form.nameTitle.value;
-    const birthDate = form.birthDate.value;
+    const name = nameRef.current?.value;
+    const surname = surnameRef.current?.value;
+    const addressCity = addressCityRef.current?.value;
+    const addressStreet = addressStreetRef.current?.value;
+    const addressZip = addressZipRef.current?.value;
+    const phone = phoneRef.current?.value;
+    const email = emailRef.current?.value;
+    const district = districtRef.current?.value;
+    const newMemberId = memberIdRef.current?.value;
+    const oldId = oldIdRef.current?.value;
+    const title = titleRef.current?.value;
+    const birthDate = birthDateRef.current?.value;
 
     const response = await fetchAPI(`/members/${id}`, {
       method: 'PUT',
@@ -59,7 +79,7 @@ export function MembersSingle() {
         phone,
         email,
         districtId: district,
-        id: memberId,
+        id: newMemberId,
         oldId,
         title,
         birthDate,
@@ -88,9 +108,12 @@ export function MembersSingle() {
     if (response.ok) {
       setMemberSuccessfullyDeleted(true);
     } else {
-      console.error(await response.text());
+      const error = await response.text();
+      setMemberSuccessfullyDeleted(false);
+      setMemberDeletedError(error);
     }
   }
+
   return (
     <PageBody>
       {memberId !== id && (
@@ -98,223 +121,190 @@ export function MembersSingle() {
       )}
       {memberSuccessfullyDeleted && <Navigate to="/members" />}
       {!isUserLoggedIn && <Navigate to="/login" />}
+      <PageTitle>
+        {member?.title && member?.title + ' '}
+        {member?.name} {member?.surname} ({id})
+      </PageTitle>
+      <h2 className="text-xl font-bold pt-2">Informácie o členovi</h2>
 
-      {member && (
-        <PageTitle>
-          {member.title && member.title + ' '}
-          {member.name} {member.surname} ({id}) -{' '}
-          {isEditing ? (
-            <button
-              onClick={() => {
-                setIsEditing(false);
-              }}
-            >
-              Cancel edit
-            </button>
-          ) : (
-            <button
-              onClick={() => {
-                setIsEditing(true);
-              }}
-            >
-              Edit
-            </button>
-          )}{' '}
-          -{' '}
-          <button type="button" onClick={handleMemberDelete}>
-            Delete
-          </button>
-        </PageTitle>
-      )}
       {loading && <p>Loading...</p>}
       {error && <p>Error: {error}</p>}
-      {isEditing ? (
-        <>
-          <p>Member details</p>
-          <form onSubmit={handleMemberEdit}>
-            <div>
-              <label htmlFor="nameTitle">Title</label>
-              <input
-                className="border border-1"
-                type="text"
+      {memberDeletedError && <p>Error: {memberDeletedError}</p>}
+      {member &&
+        (isEditing ? (
+          <>
+            <form onSubmit={handleMemberEdit}>
+              <TextInput
+                defaultValue={member?.title || ''}
                 id="nameTitle"
-                name="nameTitle"
-                defaultValue={member?.title}
+                name="Titul"
+                ref={titleRef}
               />
-            </div>
-            <div>
-              <label htmlFor="firstName">Name</label>
-              <input
-                className="border border-1"
-                type="text"
+              <TextInput
+                defaultValue={member?.name || ''}
                 id="firstName"
-                name="firstName"
-                defaultValue={member?.name}
+                name="Meno"
+                ref={nameRef}
               />
-            </div>
-            <div>
-              <label htmlFor="surname">Surname</label>
-              <input
-                className="border border-1"
-                type="text"
+              <TextInput
+                defaultValue={member?.surname || ''}
                 id="surname"
-                name="surname"
-                defaultValue={member?.surname}
+                name="Priezvisko"
+                ref={surnameRef}
               />
-            </div>
-            <div>
-              <label htmlFor="memberId">ID</label>
-              <input
-                className="border border-1"
-                type="text"
-                id="memberId"
-                name="memberId"
-                defaultValue={id}
-              />
-            </div>
-            <div>
-              <label htmlFor="oldId">Old type ID</label>
-              <input
-                className="border border-1"
-                type="text"
+              <TextInput
+                defaultValue={member?.oldId || ''}
                 id="oldId"
-                name="oldId"
-                defaultValue={member?.oldId}
+                name="číslo farmy v CR"
+                ref={oldIdRef}
               />
-            </div>
-            <div>
-              <label htmlFor="birthDate">Date of birth</label>
-              <input
-                className="border border-1"
-                type="date"
+              <DateInput
+                defaultValue={new Date(member?.birthDate || '')
+                  .toISOString()
+                  .slice(0, 10)}
                 id="birthDate"
-                name="birthDate"
-                defaultValue={
-                  member?.birthDate
-                    ? new Date(member.birthDate).toISOString().substring(0, 10)
-                    : ''
-                }
+                name="Dátum narodenia"
+                ref={birthDateRef}
               />
-            </div>
-            <div>
-              <label htmlFor="addressCity">City</label>
-              <input
-                className="border border-1"
-                type="text"
+              <TextInput
+                defaultValue={member?.addressCity || ''}
                 id="addressCity"
-                name="addressCity"
-                defaultValue={member?.addressCity}
+                name="Mesto"
+                ref={addressCityRef}
               />
-            </div>
-            <div>
-              <label htmlFor="addressStreet">Street</label>
-              <input
-                className="border border-1"
-                type="text"
+              <TextInput
+                defaultValue={member?.addressStreet || ''}
                 id="addressStreet"
-                name="addressStreet"
-                defaultValue={member?.addressStreet}
+                name="Ulica"
+                ref={addressStreetRef}
               />
-            </div>
-            <div>
-              <label htmlFor="addressZip">ZIP Code</label>
-              <input
-                className="border border-1"
-                type="text"
+              <TextInput
+                defaultValue={member?.addressZip || ''}
                 id="addressZip"
-                name="addressZip"
-                defaultValue={member?.addressZip}
+                name="PSČ"
+                ref={addressZipRef}
               />
-            </div>
-            <div>
-              <label htmlFor="phone">Phone</label>
-              <input
-                className="border border-1"
-                type="text"
-                id="phone"
-                name="phone"
+              <TextInput
                 defaultValue={member?.phone || ''}
+                id="phone"
+                name="Telefón"
+                ref={phoneRef}
               />
-            </div>
-            <div>
-              <label htmlFor="email">Email</label>
-              <input
-                className="border border-1"
-                type="text"
-                id="email"
-                name="email"
+              <EmailInput
                 defaultValue={member?.email || ''}
+                id="email"
+                name="Email"
+                ref={emailRef}
               />
-            </div>
-            <div>
-              <label htmlFor="district">District</label>
-              <select
-                className="border border-1"
+              <SelectInput
                 id="district"
-                name="district"
-                defaultValue={member?.districtId || ''}
+                name="Obvod"
+                placeholder="---"
+                defaultValue={member.district?.id}
+                ref={districtRef}
               >
-                <option value="">---</option>
                 {districts &&
                   districts.map((district) => (
                     <option key={district.id} value={district.id}>
                       {district.name}
                     </option>
                   ))}
-              </select>
-            </div>
-            <br />
-            {updateError && <p>{updateError}</p>}
-            <button type="submit">Save</button>
-          </form>
-        </>
-      ) : (
-        <>
-          <h2 className="text-xl font-bold pt-2">Member details</h2>
-          {member && (
-            <div>
-              <p>
-                Address: {member.addressStreet}, {member.addressCity},{' '}
-                {member.addressZip}
-              </p>
-              {member.oldId && <p>Old type ID: {member.oldId}</p>}
-              <p>
-                Date of birth:{' '}
-                {member.birthDate
-                  ? new Date(member.birthDate || '').toLocaleDateString()
-                  : '-'}
-              </p>
-              <p>Phone: {member.phone}</p>
-              <p>Email: {member.email}</p>
-              <p>
-                District:{' '}
-                {member.district ? (
-                  <Link to="/districts/$id" params={{id: member.district.id}}>
-                    {member.district.name}
-                  </Link>
-                ) : (
-                  '-'
+              </SelectInput>
+              <br />
+              {updateError && <p>{updateError}</p>}
+              <Button type="submit">Uložiť</Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  setIsEditing(false);
+                }}
+              >
+                Zrušiť zmeny
+              </Button>
+            </form>
+          </>
+        ) : (
+          <>
+            {
+              <div className="py-4">
+                <p>
+                  <span className="font-bold">Adresa: </span>
+                  {member.addressStreet}, {member.addressCity},{' '}
+                  {member.addressZip}
+                </p>
+                {member.oldId && (
+                  <p>
+                    <span className="font-bold">Old type ID: </span>
+                    {member.oldId}
+                  </p>
                 )}
-              </p>
-              {member.managerDistrict.length !== 0 && (
-                <div>
-                  Manager for:{' '}
-                  <ul>
-                    {member.managerDistrict.map((managerDistrict) => (
-                      <li
-                        key={managerDistrict.id}
-                        className="list-item list-disc list-inside"
-                      >
-                        {managerDistrict.name}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-        </>
-      )}
+                <p>
+                  <span className="font-bold">Dátum narodenia: </span>
+                  {member.birthDate
+                    ? new Date(member.birthDate || '').toLocaleDateString()
+                    : '-'}
+                </p>
+                <p>
+                  <span className="font-bold">Tel. číslo: </span>
+                  {member.phone || '-'}
+                </p>
+                <p>
+                  <span className="font-bold">E-mail: </span>
+                  {member.email || '-'}
+                </p>
+                <p>
+                  <span className="font-bold">Obvod: </span>
+                  {member.district ? (
+                    <Link
+                      className="hover:underline"
+                      to="/districts/$id"
+                      params={{id: member.district.id}}
+                    >
+                      {member.district.name}
+                    </Link>
+                  ) : (
+                    '-'
+                  )}
+                </p>
+                {member.managerDistrict.length !== 0 && (
+                  <div>
+                    <span className="font-bold">Vedúci v obvodoch: </span>
+                    <ul>
+                      {member.managerDistrict.map((managerDistrict) => (
+                        <li
+                          key={managerDistrict.id}
+                          className="list-item list-disc list-inside"
+                        >
+                          <Link
+                            to="/districts/$id"
+                            className="hover:underline"
+                            params={{id: managerDistrict.id}}
+                          >
+                            {managerDistrict.name}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            }
+            <Button
+              onClick={() => {
+                setIsEditing(true);
+              }}
+            >
+              Upraviť
+            </Button>
+            <Button
+              onClick={() => {
+                handleMemberDelete();
+              }}
+            >
+              Vymazať
+            </Button>
+          </>
+        ))}
     </PageBody>
   );
 }

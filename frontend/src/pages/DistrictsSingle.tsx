@@ -151,7 +151,7 @@ export function DistrictsSingle() {
       ) : (
         <>
           {district && (
-            <div>
+            <div className='py-4'>
               <p>
                 <span className="font-bold">Počet členov: </span>
                 {district.members.length}

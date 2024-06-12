@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {PageBody} from '../components/PageBody';
 import {PageTitle} from '../components/PageTitle';
 import {useAPI} from '../hooks/useAPI';
@@ -7,6 +7,9 @@ import {useAuth} from '../hooks/useAuth';
 import {Navigate} from '@tanstack/react-router';
 import {fetchAPI} from '../utils/fetchAPI';
 import {AddAdminData} from '../components/AddAdminData';
+import {Dialog} from '../components/Dialog';
+import {Button} from '../components/Button';
+import {SelectInput} from '../components/Input/SelectInput';
 
 export function AdminPage() {
   const {isUserLoggedIn} = useAuth();
@@ -16,6 +19,8 @@ export function AdminPage() {
   const [selectedData, setSelectedData] = useState<AdminData | undefined>();
   const [isEditing, setIsEditing] = useState(false);
   const [sortedData, setSortedData] = useState<AdminData[] | undefined>();
+
+  const addAdminDataDialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     setSortedData(
@@ -84,20 +89,19 @@ export function AdminPage() {
       {error && <p>Error: {error}</p>}
       {sortedData && selectedData && !isEditing && (
         <>
-          <select
-            className="p-1 border border-gray-300 rounded"
+          <SelectInput
+            placeholder="Vybrať rok"
+            id="yearSelect"
+            name="Vybrať rok"
             defaultValue={currentYear || ''}
             onChange={(e) => setCurrentYear(e.target.value)}
           >
-            <option value="" disabled>
-              Select year
-            </option>
             {sortedData?.map((d) => (
               <option key={d.year} value={d.year}>
                 {d.year}
               </option>
             ))}
-          </select>
+          </SelectInput>
           <div>
             <p>Treating amount: {selectedData.treatingAmount}</p>
             <p>Pollination amount: {selectedData.pollinationAmount}</p>
@@ -200,7 +204,21 @@ export function AdminPage() {
           <button type="submit">Save</button>
         </form>
       )}
-      <AddAdminData refetchAdminData={refetch} />
+      <Button
+        onClick={() => {
+          addAdminDataDialogRef.current?.showModal();
+        }}
+      >
+        Pridať člena
+      </Button>
+      <Dialog ref={addAdminDataDialogRef}>
+        <AddAdminData
+          refetchAdminData={refetch}
+          closeModal={() => {
+            addAdminDataDialogRef.current?.close();
+          }}
+        />
+      </Dialog>
     </PageBody>
   );
 }

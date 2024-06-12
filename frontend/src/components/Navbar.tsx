@@ -9,36 +9,36 @@ export function Navbar() {
 
   return (
     <>
-      <div className="p-2 flex gap-2">
+      <div className="p-2 flex gap-5">
         <Link
           to="/"
           className="[&.active]:font-bold [&.active]:border-b-4 border-solid hover:border-dashed hover:border-yellow-500 [&.active]:border-yellow-500 border-white border-b-2"
         >
-          Home
+          Domov
         </Link>
         <Link
           to="/reports"
           className="[&.active]:font-bold [&.active]:border-b-4 border-solid hover:border-dashed hover:border-yellow-500 [&.active]:border-yellow-500 border-white border-b-2"
         >
-          Reports
+          Reporty
         </Link>
         <Link
           to="/districts"
           className="[&.active]:font-bold [&.active]:border-b-4 border-solid hover:border-dashed hover:border-yellow-500 [&.active]:border-yellow-500 border-white border-b-2"
         >
-          Districts
+          Obvody
         </Link>
         <Link
           to="/members"
           className="[&.active]:font-bold [&.active]:border-b-4 border-solid hover:border-dashed hover:border-yellow-500 [&.active]:border-yellow-500 border-white border-b-2"
         >
-          Members
+          Členovia
         </Link>
         <Link
           to="/admin"
           className="[&.active]:font-bold [&.active]:border-b-4 border-solid hover:border-dashed hover:border-yellow-500 [&.active]:border-yellow-500 border-white border-b-2"
         >
-          Admin
+          Admin dáta
         </Link>
         <div className="ml-auto">
           {!isUserLoggedIn ? (
@@ -50,6 +50,7 @@ export function Navbar() {
             </Link>
           ) : (
             <button
+            className='hover:border-dashed hover:border-yellow-500 border-white border-b-2'
               onClick={() => {
                 removeLoginToken();
                 setIsUserLoggedIn(false);
